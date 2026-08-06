@@ -8,7 +8,10 @@ struct ContentView: View {
                 GoalPageView()
             }
 
-            Tab("Journey", systemImage: "point.topleft.down.curvedto.point.bottomright.up") {
+            Tab(
+                "Journey",
+                systemImage: "point.topleft.down.curvedto.point.bottomright.up"
+            ) {
                 MainView()
             }
 
@@ -16,6 +19,7 @@ struct ContentView: View {
                 GoalPageView()
             }
         }
+        .weeklyRecap()
     }
 }
 

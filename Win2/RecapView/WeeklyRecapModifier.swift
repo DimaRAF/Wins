@@ -57,14 +57,14 @@ struct WeeklyRecapModifier: ViewModifier {
     }
 
     private func checkIfSundayAndShowAlert() {
-        let weekday = Calendar.current.component(
-            .weekday,
-            from: Date()
-        )
+      //  let weekday = Calendar.current.component(
+          //  .weekday,
+          //  from: Date()
+       // )
 
-        if weekday == 1 {
+      //  if weekday == 1 {
             showAlert = true
-        }
+       // }
     }
 }
 
