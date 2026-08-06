@@ -64,7 +64,7 @@ struct WeeklyRecapModifier: ViewModifier {
 
         if weekday == 1 {
             showAlert = true
-        }
+            }
     }
 }
 
