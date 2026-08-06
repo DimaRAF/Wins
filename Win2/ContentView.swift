@@ -1,11 +1,17 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var completedMinutes = 0
+    @State private var targetMinutes = 120
+
     var body: some View {
         TabView {
 
             Tab("Goal", systemImage: "target") {
-                GoalPageView()
+                GoalPageView(
+                    completedMinutes: $completedMinutes,
+                    targetMinutes: targetMinutes
+                )
             }
 
             Tab(
@@ -16,7 +22,10 @@ struct ContentView: View {
             }
 
             Tab("Focus", systemImage: "timer") {
-                GoalPageView()
+                GoalPageView(
+                    completedMinutes: $completedMinutes,
+                    targetMinutes: targetMinutes
+                )
             }
         }
         .weeklyRecap()
