@@ -57,6 +57,8 @@ struct MainView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 12) {
                 
+                HeaderView()
+                
                 WeekSelectorBarView(weeks: weeks, selectedWeekTitle: $selectedWeekTitle)
                     .padding(.top, 8)
                 
