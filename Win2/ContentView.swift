@@ -1,8 +1,19 @@
 import SwiftUI
+import Combine
 
 struct ContentView: View {
     @State private var completedMinutes = 0
-    @State private var targetMinutes = 120
+    @State private var targetMinutes = 1
+
+    @State private var currentDay =
+        Calendar.current.startOfDay(for: Date())
+
+    private let dayCheckTimer = Timer.publish(
+        every: 60,
+        on: .main,
+        in: .common
+    )
+    .autoconnect()
 
     var body: some View {
         TabView {
@@ -22,13 +33,26 @@ struct ContentView: View {
             }
 
             Tab("Focus", systemImage: "timer") {
-                GoalPageView(
+                FocusView(
                     completedMinutes: $completedMinutes,
                     targetMinutes: targetMinutes
                 )
             }
         }
         .weeklyRecap()
+        .onReceive(dayCheckTimer) { _ in
+            checkForNewDay()
+        }
+    }
+
+    private func checkForNewDay() {
+        let today =
+            Calendar.current.startOfDay(for: Date())
+
+        if today != currentDay {
+            completedMinutes = 0
+            currentDay = today
+        }
     }
 }
 
