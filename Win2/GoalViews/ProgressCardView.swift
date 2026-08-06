@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct ProgressCardView: View {
-    @State private var completedMinutes = 90
-    @State private var isShowingTimePicker = false
+    @Binding var completedMinutes: Int
+    let targetMinutes: Int
 
-    private let targetMinutes = 120
+    @State private var isShowingTimePicker = false
 
     private var progress: Double {
         guard targetMinutes > 0 else { return 0 }
@@ -310,7 +310,10 @@ private struct CompactTimePicker: View {
 }
 
 #Preview {
-    ProgressCardView()
-        .padding(20)
-        .background(Color("AppBackground"))
+    ProgressCardView(
+        completedMinutes: .constant(90),
+        targetMinutes: 120
+    )
+    .padding(20)
+    .background(Color("AppBackground"))
 }

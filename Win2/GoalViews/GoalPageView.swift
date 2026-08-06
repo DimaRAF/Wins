@@ -1,11 +1,19 @@
 import SwiftUI
 
 struct GoalPageView: View {
+    @Binding var completedMinutes: Int
+    let targetMinutes: Int
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 CalendarView()
-                ProgressCardView()
+
+                ProgressCardView(
+                    completedMinutes: $completedMinutes,
+                    targetMinutes: targetMinutes
+                )
+
                 EnergyCheckInView()
             }
             .padding(.horizontal, 20)
@@ -17,5 +25,8 @@ struct GoalPageView: View {
 }
 
 #Preview {
-    GoalPageView()
+    GoalPageView(
+        completedMinutes: .constant(90),
+        targetMinutes: 120
+    )
 }
