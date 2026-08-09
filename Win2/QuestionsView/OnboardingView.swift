@@ -16,6 +16,7 @@ struct OnboardingView: View {
     @State private var maximumMinutes = 45
     @State private var targetDate = Date()
 
+    @State private var goalStartDate = Date()
     @State private var isOnboardingComplete = false
 
     var body: some View {
@@ -28,7 +29,8 @@ struct OnboardingView: View {
                     whyGoalMatters: whyGoalMatters,
                     minimumMinutes: minimumMinutes,
                     maximumMinutes: maximumMinutes,
-                    targetDate: targetDate
+                    targetDate: targetDate,
+                    goalStartDate: goalStartDate
                 )
 
             } else if currentQuestion == 1 {
@@ -81,6 +83,11 @@ struct OnboardingView: View {
                 Question5(
                     selectedDate: $targetDate,
                     next: {
+                        goalStartDate =
+                            Calendar.current.startOfDay(
+                                for: Date()
+                            )
+
                         isOnboardingComplete = true
                     },
                     back: {

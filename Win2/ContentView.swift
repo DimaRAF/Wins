@@ -7,6 +7,7 @@ struct ContentView: View {
     let minimumMinutes: Int
     let maximumMinutes: Int
     let targetDate: Date
+    let goalStartDate: Date
 
     @State private var completedMinutes = 0
     @State private var targetMinutes = 120
@@ -33,7 +34,9 @@ struct ContentView: View {
                 GoalPageView(
                     completedMinutes: $completedMinutes,
                     targetMinutes: targetMinutes,
-                    goal: goal
+                    goal: goal,
+                    targetDate: targetDate,
+                    goalStartDate: goalStartDate
                 )
             }
 
@@ -105,13 +108,16 @@ struct ContentView: View {
 }
 
 #Preview {
-    
-    
     ContentView(
-        goal: "Learn Python",
-        whyGoalMatters: "For my career",
+        goal: "Sample Goal",
+        whyGoalMatters: "Sample reason",
         minimumMinutes: 10,
         maximumMinutes: 60,
-        targetDate: Date()
+        targetDate: Calendar.current.date(
+            byAdding: .month,
+            value: 3,
+            to: Date()
+        )!,
+        goalStartDate: Date()
     )
 }
