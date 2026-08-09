@@ -11,9 +11,6 @@ import SwiftUI
 struct Win2App: App {
     var body: some Scene {
         WindowGroup {
-            
-            
-            
             OnboardingView()
         }
     }
