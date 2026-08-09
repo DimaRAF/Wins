@@ -10,63 +10,88 @@ import SwiftUI
 struct OnboardingView: View {
     @State private var currentQuestion = 1
 
+    @State private var goal = ""
+    @State private var whyGoalMatters = ""
+    @State private var minimumMinutes = 10
+    @State private var maximumMinutes = 45
+    @State private var targetDate = Date()
+
+    @State private var isOnboardingComplete = false
+
     var body: some View {
+        Group {
 
-    Group {
+            if isOnboardingComplete {
 
-    if currentQuestion == 1 {
+                ContentView(
+                    goal: goal,
+                    whyGoalMatters: whyGoalMatters,
+                    minimumMinutes: minimumMinutes,
+                    maximumMinutes: maximumMinutes,
+                    targetDate: targetDate
+                )
 
-    Question1(
-    next: {
-    currentQuestion = 2
+            } else if currentQuestion == 1 {
+
+                Question1(
+                    goal: $goal,
+                    next: {
+                        currentQuestion = 2
+                    }
+                )
+
+            } else if currentQuestion == 2 {
+
+                Question2(
+                    whyGoalMatters: $whyGoalMatters,
+                    next: {
+                        currentQuestion = 3
+                    },
+                    back: {
+                        currentQuestion = 1
+                    }
+                )
+
+            } else if currentQuestion == 3 {
+
+                Question3(
+                    selectedMinimumMinutes: $minimumMinutes,
+                    next: {
+                        currentQuestion = 4
+                    },
+                    back: {
+                        currentQuestion = 2
+                    }
+                )
+
+            } else if currentQuestion == 4 {
+
+                Question4(
+                    selectedMaximumMinutes: $maximumMinutes,
+                    next: {
+                        currentQuestion = 5
+                    },
+                    back: {
+                        currentQuestion = 3
+                    }
+                )
+
+            } else if currentQuestion == 5 {
+
+                Question5(
+                    selectedDate: $targetDate,
+                    next: {
+                        isOnboardingComplete = true
+                    },
+                    back: {
+                        currentQuestion = 4
+                    }
+                )
+            }
+        }
     }
-    )
+}
 
-    } else if currentQuestion == 2 {
-
-    Question2(
-    next: {
-    currentQuestion = 3
-    },
-    back: {
-    currentQuestion = 1
-    }
-    )
-
-    } else if currentQuestion == 3 {
-
-    Question3(
-    next: {
-    currentQuestion = 4
-    },
-    back: {
-    currentQuestion = 2
-    }
-    )
-
-    } else if currentQuestion == 4 {
-
-    Question4(
-    next: {
-    currentQuestion = 5
-    },
-    back: {
-    currentQuestion = 3
-    }
-    )
-
-    } else if currentQuestion == 5 {
-
-    Question5(
-    back: {
-    currentQuestion = 4
-    }
-    )
-    }
-    }
-    }
-    }
-
-    #Preview {
+#Preview {
     OnboardingView()
-    }
+}

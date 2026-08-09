@@ -2,8 +2,14 @@ import SwiftUI
 import Combine
 
 struct ContentView: View {
+    let goal: String
+    let whyGoalMatters: String
+    let minimumMinutes: Int
+    let maximumMinutes: Int
+    let targetDate: Date
+
     @State private var completedMinutes = 0
-    @State private var targetMinutes = 1
+    @State private var targetMinutes = 120
 
     @State private var currentDay =
         Calendar.current.startOfDay(for: Date())
@@ -69,7 +75,8 @@ struct ContentView: View {
             return
         }
 
-        let previousDayIndex = weekdayIndex(for: currentDay)
+        let previousDayIndex =
+            weekdayIndex(for: currentDay)
 
         currentWeekMinutes[previousDayIndex] =
             completedMinutes
@@ -97,5 +104,11 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(
+        goal: "Learn Python",
+        whyGoalMatters: "For my career",
+        minimumMinutes: 10,
+        maximumMinutes: 60,
+        targetDate: Date()
+    )
 }
