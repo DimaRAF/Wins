@@ -8,6 +8,11 @@ struct ContentView: View {
     @State private var currentDay =
         Calendar.current.startOfDay(for: Date())
 
+    @State private var currentWeekMinutes =
+        Array(repeating: 0, count: 7)
+
+    @State private var previousWeeks: [[Int]] = []
+
     private let dayCheckTimer = Timer.publish(
         every: 60,
         on: .main,
@@ -29,7 +34,10 @@ struct ContentView: View {
                 "Journey",
                 systemImage: "point.topleft.down.curvedto.point.bottomright.up"
             ) {
-                MainView()
+                MainView(
+                    currentWeekMinutes: currentWeekMinutes,
+                    previousWeeks: previousWeeks
+                )
             }
 
             Tab("Focus", systemImage: "timer") {
@@ -40,19 +48,51 @@ struct ContentView: View {
             }
         }
         .weeklyRecap()
+        .onChange(of: completedMinutes) { _, _ in
+            updateCurrentDayInWeek()
+        }
         .onReceive(dayCheckTimer) { _ in
             checkForNewDay()
         }
     }
 
-    private func checkForNewDay() {
-        let today =
-            Calendar.current.startOfDay(for: Date())
+    private func updateCurrentDayInWeek() {
+        let index = weekdayIndex(for: currentDay)
+        currentWeekMinutes[index] = completedMinutes
+    }
 
-        if today != currentDay {
-            completedMinutes = 0
-            currentDay = today
+    private func checkForNewDay() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        guard today != currentDay else {
+            return
         }
+
+        let previousDayIndex = weekdayIndex(for: currentDay)
+
+        currentWeekMinutes[previousDayIndex] =
+            completedMinutes
+
+        if calendar.component(
+            .weekday,
+            from: today
+        ) == 1 {
+            previousWeeks.append(currentWeekMinutes)
+
+            currentWeekMinutes =
+                Array(repeating: 0, count: 7)
+        }
+
+        completedMinutes = 0
+        currentDay = today
+    }
+
+    private func weekdayIndex(for date: Date) -> Int {
+        Calendar.current.component(
+            .weekday,
+            from: date
+        ) - 1
     }
 }
 
