@@ -3,6 +3,8 @@ import SwiftUI
 struct ProgressCardView: View {
     @Binding var completedMinutes: Int
     let targetMinutes: Int
+    let goal: String
+    
 
     @State private var isShowingTimePicker = false
 
@@ -173,7 +175,7 @@ struct ProgressCardView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
-                Text("Learn Python")
+                Text(goal)
                     .font(.headline)
                     .foregroundStyle(.primary)
 
@@ -312,7 +314,8 @@ private struct CompactTimePicker: View {
 #Preview {
     ProgressCardView(
         completedMinutes: .constant(90),
-        targetMinutes: 120
+        targetMinutes: 120,
+        goal: "Learn Python"
     )
     .padding(20)
     .background(Color("AppBackground"))

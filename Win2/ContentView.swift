@@ -32,7 +32,8 @@ struct ContentView: View {
             Tab("Goal", systemImage: "target") {
                 GoalPageView(
                     completedMinutes: $completedMinutes,
-                    targetMinutes: targetMinutes
+                    targetMinutes: targetMinutes,
+                    goal: goal
                 )
             }
 

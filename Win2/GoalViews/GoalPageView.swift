@@ -2,7 +2,9 @@ import SwiftUI
 
 struct GoalPageView: View {
     @Binding var completedMinutes: Int
+
     let targetMinutes: Int
+    let goal: String
 
     var body: some View {
         ScrollView {
@@ -11,7 +13,8 @@ struct GoalPageView: View {
 
                 ProgressCardView(
                     completedMinutes: $completedMinutes,
-                    targetMinutes: targetMinutes
+                    targetMinutes: targetMinutes,
+                    goal: goal
                 )
 
                 EnergyCheckInView()
@@ -27,6 +30,7 @@ struct GoalPageView: View {
 #Preview {
     GoalPageView(
         completedMinutes: .constant(90),
-        targetMinutes: 120
+        targetMinutes: 120,
+        goal: "Learn Python"
     )
 }
