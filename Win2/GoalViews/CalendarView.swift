@@ -9,8 +9,13 @@ struct CalendarDay: Identifiable {
 }
 
 struct CalendarView: View {
+    let goalStartDate: Date
 
-    private let calendar = Calendar.current
+    private var calendar: Calendar {
+        var calendar = Calendar.current
+        calendar.firstWeekday = 1
+        return calendar
+    }
 
     @State private var selectedDate =
         Calendar.current.startOfDay(for: Date())
@@ -108,6 +113,10 @@ struct CalendarView: View {
             for: currentDate
         )
 
+        let startDate = calendar.startOfDay(
+            for: goalStartDate
+        )
+
         let isSelected = calendar.isDate(
             day.date,
             inSameDayAs: selectedDate
@@ -120,8 +129,14 @@ struct CalendarView: View {
 
         let isFuture = day.date > today
 
+        let isBeforeGoalStart =
+            day.date < startDate
+
+        let isUnavailable =
+            isFuture || isBeforeGoalStart
+
         return Button {
-            guard !isFuture else {
+            guard !isUnavailable else {
                 return
             }
 
@@ -149,13 +164,13 @@ struct CalendarView: View {
                 textColor(
                     isSelected: isSelected,
                     isToday: isToday,
-                    isFuture: isFuture
+                    isUnavailable: isUnavailable
                 )
             )
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
             .background {
-                if isSelected {
+                if isSelected && !isUnavailable {
                     RoundedRectangle(
                         cornerRadius: 14,
                         style: .continuous
@@ -166,9 +181,7 @@ struct CalendarView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .disabled(isFuture)
-       
-       
+        .disabled(isUnavailable)
     }
 
     private func weekDays(
@@ -179,9 +192,17 @@ struct CalendarView: View {
             for: currentDate
         )
 
-        guard let weekInterval = calendar.dateInterval(
-            of: .weekOfYear,
-            for: today
+        let weekday = calendar.component(
+            .weekday,
+            from: today
+        )
+
+        let daysFromSunday = weekday - 1
+
+        guard let sunday = calendar.date(
+            byAdding: .day,
+            value: -daysFromSunday,
+            to: today
         ) else {
             return []
         }
@@ -190,7 +211,7 @@ struct CalendarView: View {
             guard let date = calendar.date(
                 byAdding: .day,
                 value: dayOffset,
-                to: weekInterval.start
+                to: sunday
             ) else {
                 return nil
             }
@@ -206,20 +227,19 @@ struct CalendarView: View {
     private func textColor(
         isSelected: Bool,
         isToday: Bool,
-        isFuture: Bool
+        isUnavailable: Bool
     ) -> Color {
 
-        if isSelected {
+        if isSelected && !isUnavailable {
             return .white
         }
 
-    
         if isToday {
             return Color("PrimaryBlue")
         }
 
-        if isFuture {
-            return .secondary.opacity(0.55)
+        if isUnavailable {
+            return .secondary.opacity(0.35)
         }
 
         return .primary
@@ -248,7 +268,9 @@ struct CalendarView: View {
 }
 
 #Preview {
-    CalendarView()
-        .padding(20)
-        .background(Color("AppBackground"))
+    CalendarView(
+        goalStartDate: Date()
+    )
+    .padding(20)
+    .background(Color("AppBackground"))
 }

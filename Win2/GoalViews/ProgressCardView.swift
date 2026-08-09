@@ -7,6 +7,7 @@ struct ProgressCardView: View {
     let goal: String
     let targetDate: Date
     let goalStartDate: Date
+    let currentDay: Date
 
     @State private var isShowingTimePicker = false
 
@@ -61,7 +62,7 @@ struct ProgressCardView: View {
             startOfWeek(for: goalStartDate)
 
         let currentWeekStart =
-            startOfWeek(for: Date())
+            startOfWeek(for: currentDay)
 
         let days =
             calendar.dateComponents(
@@ -493,7 +494,6 @@ private struct CompactTimePicker: View {
 
 
 // MARK: - Preview
-
 #Preview {
     ProgressCardView(
         completedMinutes: .constant(90),
@@ -505,7 +505,8 @@ private struct CompactTimePicker: View {
                 value: 3,
                 to: Date()
             )!,
-        goalStartDate: Date()
+        goalStartDate: Date(),
+        currentDay: Date()
     )
     .padding(20)
     .background(

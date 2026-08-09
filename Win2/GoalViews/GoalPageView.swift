@@ -2,23 +2,27 @@ import SwiftUI
 
 struct GoalPageView: View {
     @Binding var completedMinutes: Int
-    
+
     let targetMinutes: Int
     let goal: String
     let targetDate: Date
     let goalStartDate: Date
+    let currentDay: Date
 
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                CalendarView()
+                CalendarView(
+                    goalStartDate: goalStartDate
+                )
 
                 ProgressCardView(
                     completedMinutes: $completedMinutes,
                     targetMinutes: targetMinutes,
                     goal: goal,
                     targetDate: targetDate,
-                    goalStartDate: goalStartDate
+                    goalStartDate: goalStartDate,
+                    currentDay: currentDay
                 )
 
                 EnergyCheckInView()
@@ -41,6 +45,7 @@ struct GoalPageView: View {
             value: 3,
             to: Date()
         )!,
-        goalStartDate: Date()
+        goalStartDate: Date(),
+        currentDay: Date()
     )
 }

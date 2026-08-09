@@ -36,7 +36,8 @@ struct ContentView: View {
                     targetMinutes: targetMinutes,
                     goal: goal,
                     targetDate: targetDate,
-                    goalStartDate: goalStartDate
+                    goalStartDate: goalStartDate,
+                    currentDay: currentDay
                 )
             }
 
@@ -72,7 +73,8 @@ struct ContentView: View {
     }
 
     private func checkForNewDay() {
-        let calendar = Calendar.current
+        var calendar = Calendar.current
+        calendar.firstWeekday = 1
         let today = calendar.startOfDay(for: Date())
 
         guard today != currentDay else {
@@ -100,7 +102,10 @@ struct ContentView: View {
     }
 
     private func weekdayIndex(for date: Date) -> Int {
-        Calendar.current.component(
+        var calendar = Calendar.current
+        calendar.firstWeekday = 1
+
+        return calendar.component(
             .weekday,
             from: date
         ) - 1

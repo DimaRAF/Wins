@@ -1,10 +1,3 @@
-//
-//  Question2.swift
-//  FirstApp
-//
-//  Created by Nada Alsaeed on 21/02/1448 AH.
-//
-
 import SwiftUI
 
 struct Question2: View {
@@ -12,6 +5,8 @@ struct Question2: View {
 
     let next: () -> Void
     let back: () -> Void
+
+    @State private var showError = false
 
     private var isAnswerEmpty: Bool {
         whyGoalMatters
@@ -40,6 +35,33 @@ struct Question2: View {
                 .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(16)
+                .onChange(of: whyGoalMatters) { _, newValue in
+
+                    if !newValue
+                        .trimmingCharacters(
+                            in: .whitespacesAndNewlines
+                        )
+                        .isEmpty {
+
+                        showError = false
+                    }
+                }
+
+                // Error message
+                if showError {
+                    HStack(spacing: 6) {
+
+                        Image(
+                            systemName:
+                                "exclamationmark.circle.fill"
+                        )
+                        .foregroundStyle(.red)
+
+                        Text("Please enter your answer.")
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
+                }
 
                 Spacer()
             }
@@ -63,7 +85,12 @@ struct Question2: View {
                 VStack(spacing: 14) {
 
                     Button {
-                        next()
+                        if isAnswerEmpty {
+                            showError = true
+                        } else {
+                            showError = false
+                            next()
+                        }
                     } label: {
                         Text("Next")
                             .font(.headline)
@@ -79,8 +106,6 @@ struct Question2: View {
                             )
                             .clipShape(Capsule())
                     }
-                    .disabled(isAnswerEmpty)
-                    .opacity(isAnswerEmpty ? 0.5 : 1)
 
                     VStack(spacing: 6) {
                         HStack(spacing: 8) {

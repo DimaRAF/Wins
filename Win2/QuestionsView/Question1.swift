@@ -1,16 +1,11 @@
-//
-//  Question1.swift
-//  FirstApp
-//
-//  Created by Nada Alsaeed on 21/02/1448 AH.
-//
-
 import SwiftUI
 
 struct Question1: View {
     @Binding var goal: String
 
     let next: () -> Void
+
+    @State private var showError = false
 
     private var isGoalEmpty: Bool {
         goal.trimmingCharacters(
@@ -39,18 +34,63 @@ struct Question1: View {
                 .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(16)
+                .onChange(of: goal) { _, newValue in
+
+                    // Maximum 3 words
+                    let words = newValue
+                        .split(whereSeparator: \.isWhitespace)
+                        .map(String.init)
+
+                    if words.count > 3 {
+                        goal = words
+                            .prefix(3)
+                            .joined(separator: " ")
+                    }
+
+                    // Hide error when user starts typing
+                    if !goal
+                        .trimmingCharacters(
+                            in: .whitespacesAndNewlines
+                        )
+                        .isEmpty {
+
+                        showError = false
+                    }
+                }
+
+                if showError {
+                    HStack(spacing: 6) {
+
+                        Image(
+                            systemName:
+                                "exclamationmark.circle.fill"
+                        )
+                        .foregroundStyle(.red)
+
+                        Text("Please enter your goal.")
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
+                }
 
                 Spacer()
             }
             .padding(.horizontal, 28)
-            .padding(.top, 20)
+            .padding(.top, 65)
+
             .navigationBarBackButtonHidden(true)
+
             .safeAreaInset(edge: .bottom) {
 
                 VStack(spacing: 14) {
 
                     Button {
-                        next()
+                        if isGoalEmpty {
+                            showError = true
+                        } else {
+                            showError = false
+                            next()
+                        }
                     } label: {
 
                         Text("Next")
@@ -67,8 +107,6 @@ struct Question1: View {
                             )
                             .clipShape(Capsule())
                     }
-                    .disabled(isGoalEmpty)
-                    .opacity(isGoalEmpty ? 0.5 : 1)
 
                     VStack(spacing: 6) {
 
