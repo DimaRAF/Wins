@@ -104,6 +104,8 @@ struct ContentView: View {
 }
 
 #Preview {
+    
+    
     ContentView(
         goal: "Learn Python",
         whyGoalMatters: "For my career",
