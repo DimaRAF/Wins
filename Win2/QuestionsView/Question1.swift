@@ -36,15 +36,9 @@ struct Question1: View {
                 .cornerRadius(16)
                 .onChange(of: goal) { _, newValue in
 
-                    // Maximum 3 words
-                    let words = newValue
-                        .split(whereSeparator: \.isWhitespace)
-                        .map(String.init)
-
-                    if words.count > 3 {
-                        goal = words
-                            .prefix(3)
-                            .joined(separator: " ")
+                    // Maximum 30 characters
+                    if newValue.count > 30 {
+                        goal = String(newValue.prefix(30))
                     }
 
                     // Hide error when user starts typing
@@ -57,6 +51,14 @@ struct Question1: View {
                         showError = false
                     }
                 }
+
+                Text("\(goal.count)/30 characters")
+                    .font(.footnote)
+                    .foregroundStyle(.gray)
+                    .frame(
+                        maxWidth: .infinity,
+                        alignment: .trailing
+                    )
 
                 if showError {
                     HStack(spacing: 6) {
