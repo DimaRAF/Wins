@@ -1,4 +1,4 @@
-# Wins
+# Stride
 
 **An AI-powered adaptive time planning application that helps users build long-term consistency through personalized daily focus sessions and behavioral motivation.**
 
