@@ -6,14 +6,85 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		954E802E302B106000DAAB97 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 954E802D302B106000DAAB97 /* WidgetKit.framework */; };
+		954E8030302B106000DAAB97 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 954E802F302B106000DAAB97 /* SwiftUI.framework */; };
+		954E803F302B106000DAAB97 /* StrideWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 954E802B302B106000DAAB97 /* StrideWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		954E803D302B106000DAAB97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 719FE0413021D4DB00A57A9B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 954E802A302B106000DAAB97;
+			remoteInfo = StrideWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		954E8040302B106000DAAB97 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				954E803F302B106000DAAB97 /* StrideWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		719FE0493021D4DB00A57A9B /* Win2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Win2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		954E802B302B106000DAAB97 /* StrideWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = StrideWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		954E802D302B106000DAAB97 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		954E802F302B106000DAAB97 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		954E8046302B118200DAAB97 /* StrideWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StrideWidgetExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		954E8043302B106000DAAB97 /* Exceptions for "StrideWidget" folder in "StrideWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 954E802A302B106000DAAB97 /* StrideWidgetExtension */;
+		};
+		954E804A302B179000DAAB97 /* Exceptions for "StrideWidget" folder in "Win2" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				FocusIntents.swift,
+				SharedFocusData.swift,
+			);
+			target = 719FE0483021D4DB00A57A9B /* Win2 */;
+		};
+		954E804C302B19B500DAAB97 /* Exceptions for "Win2" folder in "StrideWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				FocusView/FocusAttributes.swift,
+			);
+			target = 954E802A302B106000DAAB97 /* StrideWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		719FE04B3021D4DB00A57A9B /* Win2 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				954E804C302B19B500DAAB97 /* Exceptions for "Win2" folder in "StrideWidgetExtension" target */,
+			);
 			path = Win2;
+			sourceTree = "<group>";
+		};
+		954E8031302B106000DAAB97 /* StrideWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				954E804A302B179000DAAB97 /* Exceptions for "StrideWidget" folder in "Win2" target */,
+				954E8043302B106000DAAB97 /* Exceptions for "StrideWidget" folder in "StrideWidgetExtension" target */,
+			);
+			path = StrideWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -26,13 +97,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		954E8028302B106000DAAB97 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				954E8030302B106000DAAB97 /* SwiftUI.framework in Frameworks */,
+				954E802E302B106000DAAB97 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		719FE0403021D4DB00A57A9B = {
 			isa = PBXGroup;
 			children = (
+				954E8046302B118200DAAB97 /* StrideWidgetExtension.entitlements */,
 				719FE04B3021D4DB00A57A9B /* Win2 */,
+				954E8031302B106000DAAB97 /* StrideWidget */,
+				954E802C302B106000DAAB97 /* Frameworks */,
 				719FE04A3021D4DB00A57A9B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,8 +124,18 @@
 			isa = PBXGroup;
 			children = (
 				719FE0493021D4DB00A57A9B /* Win2.app */,
+				954E802B302B106000DAAB97 /* StrideWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		954E802C302B106000DAAB97 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				954E802D302B106000DAAB97 /* WidgetKit.framework */,
+				954E802F302B106000DAAB97 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -55,10 +148,12 @@
 				719FE0453021D4DB00A57A9B /* Sources */,
 				719FE0463021D4DB00A57A9B /* Frameworks */,
 				719FE0473021D4DB00A57A9B /* Resources */,
+				954E8040302B106000DAAB97 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				954E803E302B106000DAAB97 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				719FE04B3021D4DB00A57A9B /* Win2 */,
@@ -69,6 +164,28 @@
 			productName = Win2;
 			productReference = 719FE0493021D4DB00A57A9B /* Win2.app */;
 			productType = "com.apple.product-type.application";
+		};
+		954E802A302B106000DAAB97 /* StrideWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 954E8044302B106000DAAB97 /* Build configuration list for PBXNativeTarget "StrideWidgetExtension" */;
+			buildPhases = (
+				954E8027302B106000DAAB97 /* Sources */,
+				954E8028302B106000DAAB97 /* Frameworks */,
+				954E8029302B106000DAAB97 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				954E8031302B106000DAAB97 /* StrideWidget */,
+			);
+			name = StrideWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = StrideWidgetExtension;
+			productReference = 954E802B302B106000DAAB97 /* StrideWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -81,6 +198,9 @@
 				LastUpgradeCheck = 2660;
 				TargetAttributes = {
 					719FE0483021D4DB00A57A9B = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					954E802A302B106000DAAB97 = {
 						CreatedOnToolsVersion = 26.6;
 					};
 				};
@@ -100,12 +220,20 @@
 			projectRoot = "";
 			targets = (
 				719FE0483021D4DB00A57A9B /* Win2 */,
+				954E802A302B106000DAAB97 /* StrideWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		719FE0473021D4DB00A57A9B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		954E8029302B106000DAAB97 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +250,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		954E8027302B106000DAAB97 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		954E803E302B106000DAAB97 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 954E802A302B106000DAAB97 /* StrideWidgetExtension */;
+			targetProxy = 954E803D302B106000DAAB97 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		719FE0523021D4DC00A57A9B /* Debug */ = {
@@ -249,11 +392,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Win2/Win2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Stride;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -281,11 +427,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Win2/Win2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Stride;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -301,6 +450,68 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		954E8041302B106000DAAB97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = StrideWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = StrideWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = StrideWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com-dima.Win2.StrideWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		954E8042302B106000DAAB97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = StrideWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = StrideWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = StrideWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com-dima.Win2.StrideWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -325,6 +536,15 @@
 			buildConfigurations = (
 				719FE0553021D4DC00A57A9B /* Debug */,
 				719FE0563021D4DC00A57A9B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		954E8044302B106000DAAB97 /* Build configuration list for PBXNativeTarget "StrideWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				954E8041302B106000DAAB97 /* Debug */,
+				954E8042302B106000DAAB97 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

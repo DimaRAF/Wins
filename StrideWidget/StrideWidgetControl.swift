@@ -1,54 +1,31 @@
-//
-//  StrideWidgetControl.swift
-//  StrideWidget
-//
-//  Created by Raghad Alkhurayyif on 28/02/1448 AH.
-//
-
 import AppIntents
 import SwiftUI
 import WidgetKit
 
 struct StrideWidgetControl: ControlWidget {
+
+    static let kind =
+        "com.stride.app.FocusControl"
+
     var body: some ControlWidgetConfiguration {
+
         StaticControlConfiguration(
-            kind: "com-dima.Win2.StrideWidget",
-            provider: Provider()
-        ) { value in
-            ControlWidgetToggle(
-                "Start Timer",
-                isOn: value,
-                action: StartTimerIntent()
-            ) { isRunning in
-                Label(isRunning ? "On" : "Off", systemImage: "timer")
+            kind: Self.kind
+        ) {
+
+            ControlWidgetButton(
+                action: StartFocusIntent()
+            ) {
+
+                Label(
+                    "Start Focus",
+                    systemImage: "target"
+                )
             }
         }
-        .displayName("Timer")
-        .description("A an example control that runs a timer.")
-    }
-}
-
-extension StrideWidgetControl {
-    struct Provider: ControlValueProvider {
-        var previewValue: Bool {
-            false
-        }
-
-        func currentValue() async throws -> Bool {
-            let isRunning = true // Check if the timer is running
-            return isRunning
-        }
-    }
-}
-
-struct StartTimerIntent: SetValueIntent {
-    static let title: LocalizedStringResource = "Start a timer"
-
-    @Parameter(title: "Timer is running")
-    var value: Bool
-
-    func perform() async throws -> some IntentResult {
-        // Start / stop the timer based on `value`.
-        return .result()
+        .displayName("Stride Focus")
+        .description(
+            "Start your focus session without opening Stride."
+        )
     }
 }

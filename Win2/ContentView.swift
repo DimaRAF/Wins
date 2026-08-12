@@ -58,7 +58,13 @@ struct ContentView: View {
                 )
             }
         }
-        .weeklyRecap(goalStartDate: goalStartDate, targetDate: targetDate)
+        .weeklyRecap(
+            goalStartDate: goalStartDate,
+            targetDate: targetDate
+        )
+        .onAppear {
+            SharedFocusData.setGoalName(goal)
+        }
         .onChange(of: completedMinutes) { _, _ in
             updateCurrentDayInWeek()
         }
@@ -68,21 +74,31 @@ struct ContentView: View {
     }
 
     private func updateCurrentDayInWeek() {
-        let index = weekdayIndex(for: currentDay)
-        currentWeekMinutes[index] = completedMinutes
+        let index = weekdayIndex(
+            for: currentDay
+        )
+
+        currentWeekMinutes[index] =
+            completedMinutes
     }
 
     private func checkForNewDay() {
         var calendar = Calendar.current
         calendar.firstWeekday = 1
-        let today = calendar.startOfDay(for: Date())
+
+        let today =
+            calendar.startOfDay(
+                for: Date()
+            )
 
         guard today != currentDay else {
             return
         }
 
         let previousDayIndex =
-            weekdayIndex(for: currentDay)
+            weekdayIndex(
+                for: currentDay
+            )
 
         currentWeekMinutes[previousDayIndex] =
             completedMinutes
@@ -91,17 +107,26 @@ struct ContentView: View {
             .weekday,
             from: today
         ) == 1 {
-            previousWeeks.append(currentWeekMinutes)
+
+            previousWeeks.append(
+                currentWeekMinutes
+            )
 
             currentWeekMinutes =
-                Array(repeating: 0, count: 7)
+                Array(
+                    repeating: 0,
+                    count: 7
+                )
         }
 
         completedMinutes = 0
         currentDay = today
     }
 
-    private func weekdayIndex(for date: Date) -> Int {
+    private func weekdayIndex(
+        for date: Date
+    ) -> Int {
+
         var calendar = Calendar.current
         calendar.firstWeekday = 1
 

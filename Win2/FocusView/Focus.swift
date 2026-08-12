@@ -22,7 +22,6 @@ struct FocusView: View {
     @State private var isPaused = false
     @State private var elapsedTime: Double = 0
     @State private var startDate: Date?
-    @State private var accumulatedTime: Double = 0
 
     private let timer = Timer.publish(
         every: 0.1,
@@ -31,8 +30,7 @@ struct FocusView: View {
     )
     .autoconnect()
 
-    @State private var currentActivity:
-        Activity<FocusAttributes>?
+    // MARK: - Remaining Target
 
     private var remainingMinutes: Int {
         max(
@@ -41,10 +39,30 @@ struct FocusView: View {
         )
     }
 
+    // MARK: - Timer Text
+
     private var formattedTime: String {
-        let totalSeconds = Int(elapsedTime)
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
+        let totalSeconds = max(
+            0,
+            Int(elapsedTime)
+        )
+
+        let hours = totalSeconds / 3600
+
+        let minutes =
+            (totalSeconds % 3600) / 60
+
+        let seconds =
+            totalSeconds % 60
+
+        if hours > 0 {
+            return String(
+                format: "%02d:%02d:%02d",
+                hours,
+                minutes,
+                seconds
+            )
+        }
 
         return String(
             format: "%02d:%02d",
@@ -53,23 +71,27 @@ struct FocusView: View {
         )
     }
 
+    // MARK: - Circle Progress
+
     private var progressRatio: Double {
-        guard isRunning else {
+        guard isRunning || isPaused else {
             return 0
         }
 
-        let remainingSeconds =
+        let targetSeconds =
             Double(remainingMinutes * 60)
 
-        guard remainingSeconds > 0 else {
+        guard targetSeconds > 0 else {
             return 1
         }
 
         return min(
-            elapsedTime / remainingSeconds,
+            elapsedTime / targetSeconds,
             1
         )
     }
+
+    // MARK: - Body
 
     var body: some View {
         ZStack {
@@ -77,13 +99,17 @@ struct FocusView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                HeaderSection(textColor: textColor)
-                    .padding(.top, -9)
-                    .offset(y: 70)
+
+                HeaderSection(
+                    textColor: textColor
+                )
+                .padding(.top, -9)
+                .offset(y: 70)
 
                 Spacer()
 
                 VStack(spacing: 80) {
+
                     CircularProgressView(
                         progress: progressRatio,
                         timeString: formattedTime,
@@ -93,11 +119,12 @@ struct FocusView: View {
                     )
 
                     ControlButtonsView(
-                        isRunning: $isRunning,
-                        isPaused: $isPaused,
+                        isRunning: isRunning,
+                        isPaused: isPaused,
                         primaryColor: primaryBlue,
                         onStart: startTimer,
-                        onPause: togglePauseTimer,
+                        onPause: pauseTimer,
+                        onResume: resumeTimer,
                         onEnd: endTimer
                     )
                     .padding(.top, -35)
@@ -107,55 +134,259 @@ struct FocusView: View {
             }
             .padding(.horizontal, 28)
         }
-        .onReceive(timer) { _ in
-            guard
-                isRunning,
-                !isPaused,
-                let startDate
-            else {
-                return
-            }
 
-            elapsedTime =
-                accumulatedTime
-                + Date().timeIntervalSince(startDate)
+        // Keeps FocusView synced with Live Activity.
+        .onReceive(timer) { _ in
+            syncWithLiveActivity()
+            syncCompletedMinutes()
+
+            if isRunning,
+               let startDate {
+
+                elapsedTime =
+                    Date().timeIntervalSince(
+                        startDate
+                    )
+            }
+        }
+
+        .onAppear {
+            syncWithLiveActivity()
+            syncCompletedMinutes()
         }
     }
 
-    private func startLiveActivity() {
+    // MARK: - Start
+
+    private func startTimer() {
+        triggerHaptic()
+
+        Task {
+            // If a Live Activity already exists,
+            // reuse it instead of creating another one.
+            if let activity =
+                Activity<FocusAttributes>
+                    .activities
+                    .first {
+
+                let now = Date()
+
+                let newState =
+                    FocusAttributes.ContentState(
+                        isRunning: true,
+                        isPaused: false,
+                        startDate: now,
+                        endDate:
+                            now.addingTimeInterval(
+                                24 * 60 * 60
+                            ),
+                        elapsedTime: 0
+                    )
+
+                await activity.update(
+                    ActivityContent(
+                        state: newState,
+                        staleDate: nil
+                    )
+                )
+
+            } else {
+
+                await createLiveActivity()
+            }
+
+            await MainActor.run {
+                isRunning = true
+                isPaused = false
+                elapsedTime = 0
+                startDate = Date()
+            }
+        }
+    }
+
+    // MARK: - Pause
+
+    private func pauseTimer() {
+        triggerHaptic()
+
+        guard let activity =
+            Activity<FocusAttributes>
+                .activities
+                .first
+        else {
+            return
+        }
+
+        let currentElapsed =
+            calculateElapsedTime(
+                from: activity.content.state
+            )
+
+        Task {
+            let pausedState =
+                FocusAttributes.ContentState(
+                    isRunning: false,
+                    isPaused: true,
+                    startDate: nil,
+                    endDate: nil,
+                    elapsedTime: currentElapsed
+                )
+
+            await activity.update(
+                ActivityContent(
+                    state: pausedState,
+                    staleDate: nil
+                )
+            )
+
+            await MainActor.run {
+                isRunning = false
+                isPaused = true
+                elapsedTime = currentElapsed
+                startDate = nil
+            }
+        }
+    }
+
+    // MARK: - Resume
+
+    private func resumeTimer() {
+        triggerHaptic()
+
+        guard let activity =
+            Activity<FocusAttributes>
+                .activities
+                .first
+        else {
+            return
+        }
+
+        let previousElapsed =
+            activity.content.state.elapsedTime
+
+        let now = Date()
+
+        let resumedStartDate =
+            now.addingTimeInterval(
+                -previousElapsed
+            )
+
+        Task {
+            let resumedState =
+                FocusAttributes.ContentState(
+                    isRunning: true,
+                    isPaused: false,
+                    startDate: resumedStartDate,
+                    endDate:
+                        resumedStartDate
+                            .addingTimeInterval(
+                                24 * 60 * 60
+                            ),
+                    elapsedTime: previousElapsed
+                )
+
+            await activity.update(
+                ActivityContent(
+                    state: resumedState,
+                    staleDate: nil
+                )
+            )
+
+            await MainActor.run {
+                isRunning = true
+                isPaused = false
+                elapsedTime = previousElapsed
+                startDate = resumedStartDate
+            }
+        }
+    }
+
+    // MARK: - End
+
+    private func endTimer() {
+        triggerHaptic()
+
+        guard let activity =
+            Activity<FocusAttributes>
+                .activities
+                .first
+        else {
+            resetLocalTimer()
+            return
+        }
+
+        let sessionDuration =
+            calculateElapsedTime(
+                from: activity.content.state
+            )
+
+        // Save today's completed focus time.
+        let newTotal =
+            SharedFocusData.addSession(
+                sessionDuration
+            )
+
+        completedMinutes =
+            Int(newTotal / 60)
+
+        Task {
+            let resetState =
+                FocusAttributes.ContentState(
+                    isRunning: false,
+                    isPaused: false,
+                    startDate: nil,
+                    endDate: nil,
+                    elapsedTime: 0
+                )
+
+            await activity.update(
+                ActivityContent(
+                    state: resetState,
+                    staleDate: nil
+                )
+            )
+
+            await MainActor.run {
+                resetLocalTimer()
+            }
+        }
+    }
+
+    // MARK: - Create Live Activity
+
+    private func createLiveActivity() async {
         guard ActivityAuthorizationInfo()
             .areActivitiesEnabled else {
             return
         }
 
-        let attributes = FocusAttributes(
-            sessionName: "Focus Session"
-        )
+        let now = Date()
 
-        let duration =
-            TimeInterval(remainingMinutes * 60)
-
-        let activityStartDate = Date()
-        let activityEndDate =
-            activityStartDate.addingTimeInterval(
-                duration
+        let attributes =
+            FocusAttributes(
+                taskName: "Focus Session"
             )
 
-        let initialState = FocusAttributes.ContentState(
-            isRunning: true,
-            timerRange:
-                activityStartDate...activityEndDate,
-            taskTitle: "Focus Session",
-            totalMinutes: "\(remainingMinutes) min"
-        )
+        let initialState =
+            FocusAttributes.ContentState(
+                isRunning: true,
+                isPaused: false,
+                startDate: now,
+                endDate:
+                    now.addingTimeInterval(
+                        24 * 60 * 60
+                    ),
+                elapsedTime: 0
+            )
 
         do {
-            currentActivity = try Activity.request(
+            _ = try Activity.request(
                 attributes: attributes,
-                content: .init(
+                content: ActivityContent(
                     state: initialState,
                     staleDate: nil
-                )
+                ),
+                pushType: nil
             )
         } catch {
             print(
@@ -164,146 +395,120 @@ struct FocusView: View {
         }
     }
 
-    private func updateLiveActivity(
-        running: Bool
-    ) {
-        guard let activity = currentActivity else {
+    // MARK: - Sync Live Activity → App
+
+    private func syncWithLiveActivity() {
+        guard let activity =
+            Activity<FocusAttributes>
+                .activities
+                .first
+        else {
             return
         }
 
-        let remainingSessionSeconds = max(
-            Double(remainingMinutes * 60)
-                - elapsedTime,
-            0
-        )
+        let state =
+            activity.content.state
 
-        let activityStartDate = Date()
-        let activityEndDate =
-            activityStartDate.addingTimeInterval(
-                remainingSessionSeconds
-            )
+        isRunning =
+            state.isRunning
 
-        let updatedState = FocusAttributes.ContentState(
-            isRunning: running,
-            timerRange:
-                activityStartDate...activityEndDate,
-            taskTitle: "Focus Session",
-            totalMinutes: "\(remainingMinutes) min"
-        )
+        isPaused =
+            state.isPaused
 
-        Task {
-            await activity.update(
-                ActivityContent(
-                    state: updatedState,
-                    staleDate: nil
+        if state.isRunning,
+           let activityStartDate =
+            state.startDate {
+
+            startDate =
+                activityStartDate
+
+            elapsedTime =
+                Date().timeIntervalSince(
+                    activityStartDate
                 )
-            )
+
+        } else {
+
+            startDate = nil
+
+            elapsedTime =
+                state.elapsedTime
         }
     }
 
-    private func endLiveActivity() {
-        Task {
-            for activity
-                in Activity<FocusAttributes>.activities {
+    // MARK: - Sync Widget Completed Time → App
 
-                await activity.end(
-                    nil,
-                    dismissalPolicy: .immediate
-                )
-            }
+    private func syncCompletedMinutes() {
+        let sharedMinutes =
+            Int(
+                SharedFocusData
+                    .completedFocusSeconds
+                / 60
+            )
 
-            currentActivity = nil
+        if sharedMinutes >
+            completedMinutes {
+
+            completedMinutes =
+                sharedMinutes
         }
     }
+
+    // MARK: - Calculate Session Time
+
+    private func calculateElapsedTime(
+        from state:
+            FocusAttributes.ContentState
+    ) -> TimeInterval {
+
+        if state.isRunning,
+           let startDate =
+            state.startDate {
+
+            return max(
+                0,
+                Date().timeIntervalSince(
+                    startDate
+                )
+            )
+        }
+
+        return max(
+            0,
+            state.elapsedTime
+        )
+    }
+
+    // MARK: - Reset Local UI
+
+    private func resetLocalTimer() {
+        isRunning = false
+        isPaused = false
+        elapsedTime = 0
+        startDate = nil
+    }
+
+    // MARK: - Haptic
 
     private func triggerHaptic() {
-        let generator = UIImpactFeedbackGenerator(
-            style: .medium
-        )
+        let generator =
+            UIImpactFeedbackGenerator(
+                style: .medium
+            )
 
         generator.impactOccurred()
     }
-
-    private func startTimer() {
-        triggerHaptic()
-
-        withAnimation(
-            .spring(
-                response: 0.4,
-                dampingFraction: 0.8
-            )
-        ) {
-            isRunning = true
-            isPaused = false
-            elapsedTime = 0
-            accumulatedTime = 0
-            startDate = Date()
-        }
-
-        startLiveActivity()
-    }
-
-    private func togglePauseTimer() {
-        triggerHaptic()
-
-        withAnimation(
-            .spring(
-                response: 0.3,
-                dampingFraction: 0.8
-            )
-        ) {
-            if isPaused {
-                startDate = Date()
-                isPaused = false
-            } else {
-                accumulatedTime = elapsedTime
-                startDate = nil
-                isPaused = true
-            }
-        }
-
-        updateLiveActivity(
-            running: !isPaused
-        )
-    }
-
-    private func endTimer() {
-        let sessionMinutes =
-            Int(elapsedTime / 60)
-
-        completedMinutes = min(
-            completedMinutes + sessionMinutes,
-            24 * 60
-        )
-
-        resetTimer()
-    }
-
-    private func resetTimer() {
-        triggerHaptic()
-
-        withAnimation(
-            .spring(
-                response: 0.3,
-                dampingFraction: 0.8
-            )
-        ) {
-            isRunning = false
-            isPaused = false
-            elapsedTime = 0
-            accumulatedTime = 0
-            startDate = nil
-        }
-
-        endLiveActivity()
-    }
 }
+
+
+// MARK: - Header
 
 private struct HeaderSection: View {
     let textColor: Color
 
     var body: some View {
         VStack(spacing: 8) {
+
             Text("FOCUS")
                 .font(.title3)
                 .fontWeight(.bold)
@@ -320,6 +525,9 @@ private struct HeaderSection: View {
     }
 }
 
+
+// MARK: - Circular Progress
+
 private struct CircularProgressView: View {
     let progress: Double
     let timeString: String
@@ -329,6 +537,7 @@ private struct CircularProgressView: View {
 
     var body: some View {
         ZStack {
+
             Circle()
                 .stroke(
                     secondaryColor.opacity(0.4),
@@ -347,7 +556,9 @@ private struct CircularProgressView: View {
                         lineCap: .round
                     )
                 )
-                .rotationEffect(.degrees(-90))
+                .rotationEffect(
+                    .degrees(-90)
+                )
                 .animation(
                     .linear(duration: 0.1),
                     value: progress
@@ -361,7 +572,9 @@ private struct CircularProgressView: View {
                         design: .rounded
                     )
                 )
-                .foregroundStyle(textColor)
+                .foregroundStyle(
+                    textColor
+                )
         }
         .frame(
             width: 260,
@@ -370,74 +583,176 @@ private struct CircularProgressView: View {
     }
 }
 
+
+// MARK: - Buttons
+
 private struct ControlButtonsView: View {
-    @Binding var isRunning: Bool
-    @Binding var isPaused: Bool
+    let isRunning: Bool
+    let isPaused: Bool
 
     let primaryColor: Color
+
     let onStart: () -> Void
     let onPause: () -> Void
+    let onResume: () -> Void
     let onEnd: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
-            if !isRunning {
-                Button(action: onStart) {
-                    Text("Start")
-                        .font(.body)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 36)
-                        .padding(.vertical, 10)
-                        .background(primaryColor)
-                        .clipShape(Capsule())
-                }
-            } else {
-                Button(action: onEnd) {
+
+            if isRunning {
+
+                Button(
+                    action: onEnd
+                ) {
                     Text("End")
                         .font(.body)
                         .fontWeight(.semibold)
                         .foregroundStyle(.white)
-                        .padding(.horizontal, 28)
-                        .padding(.vertical, 10)
-                        .background(primaryColor)
-                        .clipShape(Capsule())
+                        .padding(
+                            .horizontal,
+                            28
+                        )
+                        .padding(
+                            .vertical,
+                            10
+                        )
+                        .background(
+                            primaryColor
+                        )
+                        .clipShape(
+                            Capsule()
+                        )
                 }
 
-                Button(action: onPause) {
+                Button(
+                    action: onPause
+                ) {
                     Image(
                         systemName:
-                            isPaused
-                            ? "play.fill"
-                            : "pause.fill"
+                            "pause.fill"
                     )
                     .font(.body)
                     .foregroundStyle(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(primaryColor)
-                    .clipShape(Capsule())
+                    .padding(
+                        .horizontal,
+                        20
+                    )
+                    .padding(
+                        .vertical,
+                        10
+                    )
+                    .background(
+                        primaryColor
+                    )
+                    .clipShape(
+                        Capsule()
+                    )
+                }
+
+            } else if isPaused {
+
+                Button(
+                    action: onEnd
+                ) {
+                    Text("End")
+                        .font(.body)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .padding(
+                            .horizontal,
+                            28
+                        )
+                        .padding(
+                            .vertical,
+                            10
+                        )
+                        .background(
+                            primaryColor
+                        )
+                        .clipShape(
+                            Capsule()
+                        )
+                }
+
+                Button(
+                    action: onResume
+                ) {
+                    Image(
+                        systemName:
+                            "play.fill"
+                    )
+                    .font(.body)
+                    .foregroundStyle(.white)
+                    .padding(
+                        .horizontal,
+                        20
+                    )
+                    .padding(
+                        .vertical,
+                        10
+                    )
+                    .background(
+                        primaryColor
+                    )
+                    .clipShape(
+                        Capsule()
+                    )
+                }
+
+            } else {
+
+                Button(
+                    action: onStart
+                ) {
+                    Text("Start")
+                        .font(.body)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .padding(
+                            .horizontal,
+                            36
+                        )
+                        .padding(
+                            .vertical,
+                            10
+                        )
+                        .background(
+                            primaryColor
+                        )
+                        .clipShape(
+                            Capsule()
+                        )
                 }
             }
         }
     }
 }
 
+
+// MARK: - Hex Color
+
 extension Color {
     init(hex: String) {
-        let scanner = Scanner(string: hex)
+        let scanner =
+            Scanner(string: hex)
+
         var rgbValue: UInt64 = 0
 
-        scanner.scanHexInt64(&rgbValue)
+        scanner.scanHexInt64(
+            &rgbValue
+        )
 
         let red =
             Double(
-                (rgbValue & 0xFF0000) >> 16
+                (rgbValue & 0xFF0000)
+                >> 16
             ) / 255
 
         let green =
             Double(
-                (rgbValue & 0x00FF00) >> 8
+                (rgbValue & 0x00FF00)
+                >> 8
             ) / 255
 
         let blue =
@@ -452,6 +767,9 @@ extension Color {
         )
     }
 }
+
+
+// MARK: - Preview
 
 #Preview {
     FocusView(

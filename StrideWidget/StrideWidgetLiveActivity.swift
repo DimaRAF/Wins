@@ -1,80 +1,319 @@
-//
-//  StrideWidgetLiveActivity.swift
-//  StrideWidget
-//
-//  Created by Raghad Alkhurayyif on 28/02/1448 AH.
-//
-
-import ActivityKit
-import WidgetKit
 import SwiftUI
-
-struct StrideWidgetAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        // Dynamic stateful properties about your activity go here!
-        var emoji: String
-    }
-
-    // Fixed non-changing properties about your activity go here!
-    var name: String
-}
+import WidgetKit
+import ActivityKit
+import AppIntents
 
 struct StrideWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: StrideWidgetAttributes.self) { context in
-            // Lock screen/banner UI goes here
-            VStack {
-                Text("Hello \(context.state.emoji)")
+        ActivityConfiguration(for: FocusAttributes.self) { context in
+
+            HStack(spacing: 10) {
+
+                Image(systemName: "target")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 34, height: 34)
+                    .foregroundStyle(Color("AccentColor"))
+
+                VStack(alignment: .leading, spacing: 3) {
+
+                    Text("FOCUS")
+                        .font(.caption2.bold())
+                        .foregroundStyle(.secondary)
+
+                    Text(context.attributes.taskName)
+                        .font(.headline)
+                        .lineLimit(1)
+
+                    if context.state.isRunning,
+                       let startDate = context.state.startDate,
+                       let endDate = context.state.endDate {
+
+                        Text(
+                            timerInterval: startDate...endDate,
+                            countsDown: false,
+                            showsHours: true
+                        )
+                        .font(
+                            .system(
+                                .title3,
+                                design: .monospaced
+                            )
+                        )
+                        .bold()
+
+                    } else {
+
+                        Text(
+                            formatElapsedTime(
+                                context.state.elapsedTime
+                            )
+                        )
+                        .font(
+                            .system(
+                                .title3,
+                                design: .monospaced
+                            )
+                        )
+                        .bold()
+                    }
+                }
+
+                Spacer(minLength: 4)
+
+                if context.state.isRunning {
+
+                    HStack(spacing: 6) {
+
+                        Button(
+                            intent: PauseFocusIntent()
+                        ) {
+                            Text("PAUSE")
+                                .font(.caption.bold())
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+
+                        Button(
+                            intent: EndFocusIntent()
+                        ) {
+                            Text("END")
+                                .font(.caption.bold())
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
+
+                } else if context.state.isPaused {
+
+                    HStack(spacing: 6) {
+
+                        Button(
+                            intent: StartFocusIntent()
+                        ) {
+                            Text("RESUME")
+                                .font(.caption.bold())
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+
+                        Button(
+                            intent: EndFocusIntent()
+                        ) {
+                            Text("END")
+                                .font(.caption.bold())
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
+
+                } else {
+
+                    Button(
+                        intent: StartFocusIntent()
+                    ) {
+                        Text("START")
+                            .font(.caption.bold())
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                }
             }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
 
         } dynamicIsland: { context in
+
             DynamicIsland {
-                // Expanded UI goes here.  Compose the expanded UI through
-                // various regions, like leading/trailing/center/bottom
+
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    Image(systemName: "target")
                 }
+
+                DynamicIslandExpandedRegion(.center) {
+                    VStack(spacing: 3) {
+
+                        Text(context.attributes.taskName)
+                            .font(.headline)
+
+                        if context.state.isRunning,
+                           let startDate = context.state.startDate,
+                           let endDate = context.state.endDate {
+
+                            Text(
+                                timerInterval: startDate...endDate,
+                                countsDown: false,
+                                showsHours: true
+                            )
+                            .font(
+                                .system(
+                                    .title3,
+                                    design: .monospaced
+                                )
+                            )
+                            .bold()
+
+                        } else {
+
+                            Text(
+                                formatElapsedTime(
+                                    context.state.elapsedTime
+                                )
+                            )
+                            .font(
+                                .system(
+                                    .title3,
+                                    design: .monospaced
+                                )
+                            )
+                            .bold()
+                        }
+                    }
+                }
+
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    if context.state.isRunning {
+
+                        Button(
+                            intent: PauseFocusIntent()
+                        ) {
+                            Image(
+                                systemName: "pause.fill"
+                            )
+                        }
+
+                    } else {
+
+                        Button(
+                            intent: StartFocusIntent()
+                        ) {
+                            Image(
+                                systemName: "play.fill"
+                            )
+                        }
+                    }
                 }
+
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
-                    // more content
+                    HStack(spacing: 12) {
+
+                        if context.state.isRunning {
+
+                            Button(
+                                intent: PauseFocusIntent()
+                            ) {
+                                Label(
+                                    "Pause",
+                                    systemImage: "pause.fill"
+                                )
+                            }
+
+                            Button(
+                                intent: EndFocusIntent()
+                            ) {
+                                Label(
+                                    "End",
+                                    systemImage: "stop.fill"
+                                )
+                            }
+
+                        } else if context.state.isPaused {
+
+                            Button(
+                                intent: StartFocusIntent()
+                            ) {
+                                Label(
+                                    "Resume",
+                                    systemImage: "play.fill"
+                                )
+                            }
+
+                            Button(
+                                intent: EndFocusIntent()
+                            ) {
+                                Label(
+                                    "End",
+                                    systemImage: "stop.fill"
+                                )
+                            }
+
+                        } else {
+
+                            Button(
+                                intent: StartFocusIntent()
+                            ) {
+                                Label(
+                                    "Start",
+                                    systemImage: "play.fill"
+                                )
+                            }
+                        }
+                    }
                 }
+
             } compactLeading: {
-                Text("L")
+
+                Image(systemName: "target")
+
             } compactTrailing: {
-                Text("T \(context.state.emoji)")
+
+                if context.state.isRunning,
+                   let startDate = context.state.startDate,
+                   let endDate = context.state.endDate {
+
+                    Text(
+                        timerInterval: startDate...endDate,
+                        countsDown: false,
+                        showsHours: false
+                    )
+                    .monospacedDigit()
+
+                } else {
+
+                    Text(
+                        formatElapsedTime(
+                            context.state.elapsedTime
+                        )
+                    )
+                    .monospacedDigit()
+                }
+
             } minimal: {
-                Text(context.state.emoji)
+
+                Image(systemName: "target")
             }
-            .widgetURL(URL(string: "http://www.apple.com"))
-            .keylineTint(Color.red)
         }
     }
 }
 
-extension StrideWidgetAttributes {
-    fileprivate static var preview: StrideWidgetAttributes {
-        StrideWidgetAttributes(name: "World")
+private func formatElapsedTime(
+    _ time: TimeInterval
+) -> String {
+
+    let totalSeconds =
+        max(0, Int(time))
+
+    let hours =
+        totalSeconds / 3600
+
+    let minutes =
+        (totalSeconds % 3600) / 60
+
+    let seconds =
+        totalSeconds % 60
+
+    if hours > 0 {
+        return String(
+            format: "%02d:%02d:%02d",
+            hours,
+            minutes,
+            seconds
+        )
     }
-}
 
-extension StrideWidgetAttributes.ContentState {
-    fileprivate static var smiley: StrideWidgetAttributes.ContentState {
-        StrideWidgetAttributes.ContentState(emoji: "😀")
-     }
-     
-     fileprivate static var starEyes: StrideWidgetAttributes.ContentState {
-         StrideWidgetAttributes.ContentState(emoji: "🤩")
-     }
-}
-
-#Preview("Notification", as: .content, using: StrideWidgetAttributes.preview) {
-   StrideWidgetLiveActivity()
-} contentStates: {
-    StrideWidgetAttributes.ContentState.smiley
-    StrideWidgetAttributes.ContentState.starEyes
+    return String(
+        format: "%02d:%02d",
+        minutes,
+        seconds
+    )
 }
