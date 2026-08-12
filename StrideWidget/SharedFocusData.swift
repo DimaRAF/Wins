@@ -9,6 +9,9 @@ struct SharedFocusData {
     private static let goalNameKey =
         "goalName"
 
+    private static let lastFocusDateKey =
+        "lastFocusDate"
+
     private static var defaults: UserDefaults {
         guard let defaults =
             UserDefaults(
@@ -22,8 +25,51 @@ struct SharedFocusData {
         return defaults
     }
 
+    // MARK: - Daily Reset Check
+
+    private static func resetIfNewDay() {
+        let calendar = Calendar.current
+        let today =
+            calendar.startOfDay(
+                for: Date()
+            )
+
+        guard let savedDate =
+            defaults.object(
+                forKey: lastFocusDateKey
+            ) as? Date
+        else {
+            defaults.set(
+                today,
+                forKey: lastFocusDateKey
+            )
+            return
+        }
+
+        let savedDay =
+            calendar.startOfDay(
+                for: savedDate
+            )
+
+        if savedDay != today {
+            defaults.set(
+                0,
+                forKey: completedFocusSecondsKey
+            )
+
+            defaults.set(
+                today,
+                forKey: lastFocusDateKey
+            )
+        }
+    }
+
+    // MARK: - Completed Focus Time
+
     static var completedFocusSeconds: TimeInterval {
-        defaults.double(
+        resetIfNewDay()
+
+        return defaults.double(
             forKey: completedFocusSecondsKey
         )
     }
@@ -31,11 +77,22 @@ struct SharedFocusData {
     static func setCompletedFocusSeconds(
         _ value: TimeInterval
     ) {
+        resetIfNewDay()
+
         defaults.set(
             max(0, value),
             forKey: completedFocusSecondsKey
         )
+
+        defaults.set(
+            Calendar.current.startOfDay(
+                for: Date()
+            ),
+            forKey: lastFocusDateKey
+        )
     }
+
+    // MARK: - Goal Name
 
     static var goalName: String {
         defaults.string(
@@ -52,10 +109,14 @@ struct SharedFocusData {
         )
     }
 
+    // MARK: - Add Session
+
     @discardableResult
     static func addSession(
         _ duration: TimeInterval
     ) -> TimeInterval {
+
+        resetIfNewDay()
 
         let newTotal =
             completedFocusSeconds
@@ -68,7 +129,19 @@ struct SharedFocusData {
         return newTotal
     }
 
+    // MARK: - Manual Daily Reset
+
     static func resetDailyFocus() {
-        setCompletedFocusSeconds(0)
+        defaults.set(
+            0,
+            forKey: completedFocusSecondsKey
+        )
+
+        defaults.set(
+            Calendar.current.startOfDay(
+                for: Date()
+            ),
+            forKey: lastFocusDateKey
+        )
     }
 }

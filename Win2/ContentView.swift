@@ -11,7 +11,7 @@ struct ContentView: View {
     let goalStartDate: Date
 
     @State private var completedMinutes = 0
-    @State private var targetMinutes = 120
+    @State private var targetMinutes: Int
 
     @State private var currentDay =
         Calendar.current.startOfDay(for: Date())
@@ -27,6 +27,26 @@ struct ContentView: View {
         in: .common
     )
     .autoconnect()
+    
+    init(
+        goal: String,
+        whyGoalMatters: String,
+        minimumMinutes: Int,
+        maximumMinutes: Int,
+        targetDate: Date,
+        goalStartDate: Date
+    ) {
+        self.goal = goal
+        self.whyGoalMatters = whyGoalMatters
+        self.minimumMinutes = minimumMinutes
+        self.maximumMinutes = maximumMinutes
+        self.targetDate = targetDate
+        self.goalStartDate = goalStartDate
+
+        _targetMinutes = State(
+            initialValue: minimumMinutes
+        )
+    }
 
     var body: some View {
         TabView {
@@ -124,6 +144,7 @@ struct ContentView: View {
         }
 
         completedMinutes = 0
+        SharedFocusData.resetDailyFocus()
         currentDay = today
     }
 
