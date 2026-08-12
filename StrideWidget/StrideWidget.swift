@@ -65,7 +65,7 @@ struct StrideFocusWidgetView: View {
                         )
                     )
 
-                Text("Stride")
+                Text(SharedFocusData.goalName)
                     .font(
                         .system(
                             size: 11,

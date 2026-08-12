@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import WidgetKit
 
 struct ContentView: View {
     let goal: String
@@ -64,6 +65,9 @@ struct ContentView: View {
         )
         .onAppear {
             SharedFocusData.setGoalName(goal)
+            WidgetCenter.shared.reloadTimelines(
+                ofKind: "StrideWidget"
+            )
         }
         .onChange(of: completedMinutes) { _, _ in
             updateCurrentDayInWeek()

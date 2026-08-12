@@ -70,7 +70,7 @@ struct StartFocusIntent: LiveActivityIntent {
         let now = Date()
 
         let attributes = FocusAttributes(
-            taskName: "Focus Session"
+            taskName: SharedFocusData.goalName
         )
 
         let initialState = FocusAttributes.ContentState(
