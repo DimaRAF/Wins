@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		719FE3FE302C620800A57A9B /* MyTabularClassifier_dataset1 1.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 719FE3FD302C620800A57A9B /* MyTabularClassifier_dataset1 1.mlmodel */; };
 		954E802E302B106000DAAB97 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 954E802D302B106000DAAB97 /* WidgetKit.framework */; };
 		954E8030302B106000DAAB97 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 954E802F302B106000DAAB97 /* SwiftUI.framework */; };
 		954E803F302B106000DAAB97 /* StrideWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 954E802B302B106000DAAB97 /* StrideWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -38,6 +39,7 @@
 
 /* Begin PBXFileReference section */
 		719FE0493021D4DB00A57A9B /* Win2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Win2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		719FE3FD302C620800A57A9B /* MyTabularClassifier_dataset1 1.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = "MyTabularClassifier_dataset1 1.mlmodel"; sourceTree = "<group>"; };
 		954E802B302B106000DAAB97 /* StrideWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = StrideWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		954E802D302B106000DAAB97 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		954E802F302B106000DAAB97 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -45,7 +47,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		954E8043302B106000DAAB97 /* Exceptions for "StrideWidget" folder in "StrideWidgetExtension" target */ = {
+		719FE40D302C79E500A57A9B /* Exceptions for "StrideWidget" folder in "StrideWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -82,7 +84,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				954E804A302B179000DAAB97 /* Exceptions for "StrideWidget" folder in "Win2" target */,
-				954E8043302B106000DAAB97 /* Exceptions for "StrideWidget" folder in "StrideWidgetExtension" target */,
+				719FE40D302C79E500A57A9B /* Exceptions for "StrideWidget" folder in "StrideWidgetExtension" target */,
 			);
 			path = StrideWidget;
 			sourceTree = "<group>";
@@ -132,6 +134,7 @@
 		954E802C302B106000DAAB97 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				719FE3FD302C620800A57A9B /* MyTabularClassifier_dataset1 1.mlmodel */,
 				954E802D302B106000DAAB97 /* WidgetKit.framework */,
 				954E802F302B106000DAAB97 /* SwiftUI.framework */,
 			);
@@ -247,6 +250,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				719FE3FE302C620800A57A9B /* MyTabularClassifier_dataset1 1.mlmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -466,8 +470,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "$(SRCROOT)/StrideWidget/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = StrideWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -497,8 +501,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "$(SRCROOT)/StrideWidget/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = StrideWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (

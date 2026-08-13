@@ -12,7 +12,19 @@ struct ContentView: View {
 
     @State private var completedMinutes = 0
     @State private var targetMinutes: Int
+    
+    private let recommendationAI = RecommendationAI()
 
+    @State private var yesterdayEnergy = "Medium"
+    @State private var todayEnergy = "Medium"
+
+    @State private var yesterdayActualTime = 0
+    @State private var yesterdayTarget = 10
+    
+    
+    
+    
+    
     @State private var currentDay =
         Calendar.current.startOfDay(for: Date())
 
@@ -85,6 +97,10 @@ struct ContentView: View {
         )
         .onAppear {
             SharedFocusData.setGoalName(goal)
+            
+            updateAIRecommendation()
+            
+            
             WidgetCenter.shared.reloadTimelines(
                 ofKind: "StrideWidget"
             )
@@ -95,6 +111,22 @@ struct ContentView: View {
         .onReceive(dayCheckTimer) { _ in
             checkForNewDay()
         }
+    }
+    
+    private func updateAIRecommendation() {
+
+        let recommendation = recommendationAI.recommend(
+            yesterdayEnergy: yesterdayEnergy,
+            todayEnergy: todayEnergy,
+            yesterdayActualTime: yesterdayActualTime,
+            yesterdayTarget: yesterdayTarget,
+            maxAvailableTime: maximumMinutes,
+            minimumTime: minimumMinutes
+        )
+
+        targetMinutes = recommendation
+
+        print("AI Recommended Time: \(recommendation)")
     }
 
     private func updateCurrentDayInWeek() {
