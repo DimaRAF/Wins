@@ -16,6 +16,7 @@ struct GoalPageView: View {
             VStack(spacing: 24) {
                 CalendarView(
                     goalStartDate: goalStartDate,
+                    targetDate: targetDate,
                     selectedDate: $selectedDate
                 )
                 

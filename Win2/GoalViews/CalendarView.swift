@@ -10,7 +10,9 @@ struct CalendarDay: Identifiable {
 
 struct CalendarView: View {
     let goalStartDate: Date
+    let targetDate: Date
     @Binding var selectedDate: Date
+
     private var calendar: Calendar {
         var calendar = Calendar.current
         calendar.firstWeekday = 1
@@ -115,6 +117,12 @@ struct CalendarView: View {
         let startDate = calendar.startOfDay(
             for: goalStartDate
         )
+        
+        let endDate = calendar.startOfDay(
+            for: targetDate
+        )
+        let isAfterGoalEnd =
+            day.date > endDate
 
         let isSelected = calendar.isDate(
             day.date,
@@ -132,7 +140,9 @@ struct CalendarView: View {
             day.date < startDate
 
         let isUnavailable =
-            isFuture || isBeforeGoalStart
+            isFuture
+            || isBeforeGoalStart
+            || isAfterGoalEnd
 
         return Button {
             guard !isUnavailable else {
@@ -229,7 +239,11 @@ struct CalendarView: View {
         isUnavailable: Bool
     ) -> Color {
 
-        if isSelected && !isUnavailable {
+        if isUnavailable {
+            return .secondary.opacity(0.35)
+        }
+
+        if isSelected {
             return .white
         }
 
@@ -237,13 +251,8 @@ struct CalendarView: View {
             return Color("PrimaryBlue")
         }
 
-        if isUnavailable {
-            return .secondary.opacity(0.35)
-        }
-
         return .primary
     }
-
     private func greeting(
         for currentDate: Date
     ) -> String {
@@ -269,6 +278,11 @@ struct CalendarView: View {
 #Preview {
     CalendarView(
         goalStartDate: Date(),
+        targetDate: Calendar.current.date(
+            byAdding: .month,
+            value: 1,
+            to: Date()
+        )!,
         selectedDate: .constant(Date())
     )
     .padding(20)

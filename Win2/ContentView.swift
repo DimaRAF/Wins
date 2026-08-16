@@ -257,6 +257,19 @@ struct ContentView: View {
         """)
     }
 
+    private var hasGoalEnded: Bool {
+        let today =
+            calendar.startOfDay(
+                for: Date()
+            )
+
+        let endDate =
+            calendar.startOfDay(
+                for: targetDate
+            )
+
+        return today > endDate
+    }
     private func loadDataForSelectedDate() {
         // Today
         if isToday(selectedDate) {
@@ -429,6 +442,9 @@ struct ContentView: View {
         // Target = onboarding minimum.
         // =====================================================
 
+        guard !hasGoalEnded else {
+            return
+        }
         guard !isGoalStartDay() else {
 
             targetMinutes = minimumMinutes
@@ -563,6 +579,19 @@ struct ContentView: View {
             return
         }
 
+        let endDate =
+            calendar.startOfDay(
+                for: targetDate
+            )
+
+        // The goal has already ended.
+        // Stay on the final goal day.
+        guard today <= endDate else {
+            selectedDate = endDate
+            currentDay = endDate
+            return
+        }
+
         let previousDayIndex =
             weekdayIndex(
                 for: currentDay
@@ -605,19 +634,14 @@ struct ContentView: View {
 
         todayEnergy = nil
 
-        // Every new day starts with the minimum
-        // until today's Energy is entered and AI
-        // calculates the new target.
         targetMinutes = minimumMinutes
 
         displayedCompletedMinutes = 0
         displayedTargetMinutes = minimumMinutes
         displayedEnergy = nil
 
-        // Load the latest previous day.
         loadLatestYesterdayData()
     }
-
     private func weekdayIndex(
         for date: Date
     ) -> Int {
