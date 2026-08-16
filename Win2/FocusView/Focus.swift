@@ -602,127 +602,59 @@ private struct ControlButtonsView: View {
 
             if isRunning {
 
-                Button(
-                    action: onEnd
-                ) {
+                // End Button
+                Button(action: onEnd) {
                     Text("End")
                         .font(.body)
                         .fontWeight(.semibold)
                         .foregroundStyle(.white)
-                        .padding(
-                            .horizontal,
-                            28
-                        )
-                        .padding(
-                            .vertical,
-                            10
-                        )
-                        .background(
-                            primaryColor
-                        )
-                        .clipShape(
-                            Capsule()
-                        )
+                        .frame(width: 90, height: 44)            .background(primaryColor)
+                        .clipShape(Capsule())
                 }
 
-                Button(
-                    action: onPause
-                ) {
-                    Image(
-                        systemName:
-                            "pause.fill"
-                    )
-                    .font(.body)
-                    .foregroundStyle(.white)
-                    .padding(
-                        .horizontal,
-                        20
-                    )
-                    .padding(
-                        .vertical,
-                        10
-                    )
-                    .background(
-                        primaryColor
-                    )
-                    .clipShape(
-                        Capsule()
-                    )
+                // Pause Button
+                Button(action: onPause) {
+                    Image(systemName: "pause.fill")
+                        .font(.body)
+                        .foregroundStyle(.white)
+                        .frame(width: 90, height: 43)
+                        .background(primaryColor)
+                        .clipShape(Capsule())
                 }
 
             } else if isPaused {
 
-                Button(
-                    action: onEnd
-                ) {
+                // End Button
+                Button(action: onEnd) {
                     Text("End")
                         .font(.body)
                         .fontWeight(.semibold)
                         .foregroundStyle(.white)
-                        .padding(
-                            .horizontal,
-                            28
-                        )
-                        .padding(
-                            .vertical,
-                            10
-                        )
-                        .background(
-                            primaryColor
-                        )
-                        .clipShape(
-                            Capsule()
-                        )
+                        .frame(width: 90, height: 44)                        .background(primaryColor)
+                        .clipShape(Capsule())
                 }
 
-                Button(
-                    action: onResume
-                ) {
-                    Image(
-                        systemName:
-                            "play.fill"
-                    )
-                    .font(.body)
-                    .foregroundStyle(.white)
-                    .padding(
-                        .horizontal,
-                        20
-                    )
-                    .padding(
-                        .vertical,
-                        10
-                    )
-                    .background(
-                        primaryColor
-                    )
-                    .clipShape(
-                        Capsule()
-                    )
+                // Resume (Play) Button
+                Button(action: onResume) {
+                    Image(systemName: "play.fill")
+                        .font(.body)
+                        .foregroundStyle(.white)
+                        .frame(width: 90, height: 44)
+                        .background(primaryColor)
+                        .clipShape(Capsule())
                 }
 
             } else {
 
-                Button(
-                    action: onStart
-                ) {
+                Button(action: onStart) {
                     Text("Start")
                         .font(.body)
                         .fontWeight(.semibold)
                         .foregroundStyle(.white)
-                        .padding(
-                            .horizontal,
-                            36
-                        )
-                        .padding(
-                            .vertical,
-                            10
-                        )
-                        .background(
-                            primaryColor
-                        )
-                        .clipShape(
-                            Capsule()
-                        )
+                        .padding(.horizontal, 36)
+                        .padding(.vertical, 10)
+                        .background(primaryColor)
+                        .clipShape(Capsule())
                 }
             }
         }
