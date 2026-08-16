@@ -10,27 +10,38 @@ import SwiftUI
 struct Recap_3: View {
     @Binding var currentPage: Int
     @Environment(\.dismiss) var dismiss
+    
     let goalStartDate: Date
-        let date: Date = Date()
+    let weeklyData: [DailyFocus]
+    let date: Date = Date()
 
-        private var calendar: Calendar {
-            var cal = Calendar.current
-            cal.firstWeekday = 1
-            return cal
-        }
+    private var calendar: Calendar {
+        var cal = Calendar.current
+        cal.firstWeekday = 1
+        return cal
+    }
 
-        private var weekNumber: Int {
-            let start = calendar.startOfDay(for: goalStartDate)
-            let current = calendar.startOfDay(for: date)
-            let days = calendar.dateComponents([.day], from: start, to: current).day ?? 0
-            return max(1, days / 7)
-        }
+    private var weekNumber: Int {
+        let start = calendar.startOfDay(for: goalStartDate)
+        let current = calendar.startOfDay(for: date)
+        let days = calendar.dateComponents([.day], from: start, to: current).day ?? 0
+        return max(1, days / 7)
+    }
 
-        private var headerTitle: String {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "MMM yyyy"
-            return "Week \(weekNumber), \(formatter.string(from: date))"
+    private var headerTitle: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM yyyy"
+        return "Week \(weekNumber), \(formatter.string(from: date))"
+    }
+    
+    private var bestDayName: String {
+            let activeDays = weeklyData.filter { $0.minutes > 0 }
+            if let maxDay = activeDays.max(by: { $0.minutes < $1.minutes }) {
+                return maxDay.day
+            }
+            return "N/A"
         }
+    
     var body: some View {
         ZStack{
             Color.appBackground
@@ -89,7 +100,7 @@ struct Recap_3: View {
                 Text("Your BEST day")
                         .font(.system(size: 24))
                     
-                Text("Tusday")
+                Text(bestDayName)
                         .font(.system(size: 64))
                         .foregroundStyle(.primaryBlue)
                     
@@ -137,5 +148,5 @@ struct Recap_3: View {
 }
 
 #Preview {
-    Recap_3(currentPage: .constant(2), goalStartDate: Date())
+    Recap_3(currentPage: .constant(2), goalStartDate: Date(), weeklyData: [])
 }

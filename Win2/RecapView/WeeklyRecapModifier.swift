@@ -10,6 +10,30 @@ struct WeeklyRecapModifier: ViewModifier {
     @State private var hasSeenRecapInThisSession = false
 
     @Environment(\.scenePhase) private var scenePhase
+    
+    private func getPreviousWeekData() -> [DailyFocus] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        
+        // بداية الأسبوع الماضي (قبل 7 أيام)
+        guard let lastWeekStart = calendar.date(byAdding: .day, value: -7, to: today) else { return [] }
+        
+        return (0..<7).compactMap { index in
+            guard let date = calendar.date(byAdding: .day, value: index, to: lastWeekStart) else { return nil }
+            
+            // قراءة البيانات المحفوظة ليوم التاريخ المحدد
+            let savedDay = DailyDataStore.shared.getDay(date: date)
+            
+            return DailyFocus(
+                date: date,
+                day: days[index],
+                minutes: Double(savedDay?.actualMinutes ?? 0),
+                targetMinutes: savedDay?.targetMinutes ?? 0,
+                isToday: false
+            )
+        }
+    }
 
     func body(content: Content) -> some View {
         content
@@ -30,16 +54,18 @@ struct WeeklyRecapModifier: ViewModifier {
                 )
             }
             .fullScreenCover(isPresented: $showRecap) {
+                let previousWeekData = getPreviousWeekData()
                 TabView(selection: $currentPage) {
                     Recap_1(currentPage: $currentPage, goalStartDate: goalStartDate).tag(0)
-                    Recap_2(currentPage: $currentPage, goalStartDate: goalStartDate).tag(1)
-                    Recap_3(currentPage: $currentPage, goalStartDate: goalStartDate).tag(2)
-                    Recap_4(currentPage: $currentPage, goalStartDate: goalStartDate).tag(3)
-                    Recap_5(currentPage: $currentPage, goalStartDate: goalStartDate).tag(4)
+                    Recap_2(currentPage: $currentPage, goalStartDate: goalStartDate, weeklyData: getPreviousWeekData()).tag(1)
+                    Recap_3(currentPage: $currentPage, goalStartDate: goalStartDate, weeklyData: getPreviousWeekData()).tag(2)
+                    Recap_4(currentPage: $currentPage, goalStartDate: goalStartDate, weeklyData: getPreviousWeekData()).tag(3)
+                    Recap_5(currentPage: $currentPage, goalStartDate: goalStartDate, weeklyData: getPreviousWeekData()).tag(4)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .ignoresSafeArea()
             }
+        
             .onAppear {
                 checkIfSundayAndShowAlert()
             }

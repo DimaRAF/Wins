@@ -69,7 +69,7 @@ struct StartFocusIntent: LiveActivityIntent {
 
         let now = Date()
 
-        let attributes = FocusAttributes(
+        let attributes = await FocusAttributes(
             taskName: SharedFocusData.goalName
         )
 
@@ -178,7 +178,7 @@ struct EndFocusIntent: LiveActivityIntent {
             sessionDuration
         )
 
-        let newTotal = SharedFocusData.addSession(
+        let newTotal = await SharedFocusData.addSession(
             sessionDuration
         )
 

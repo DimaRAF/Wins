@@ -11,26 +11,27 @@ struct Recap_2: View {
     @Binding var currentPage: Int
     @Environment(\.dismiss) var dismiss
     let goalStartDate: Date
-        let date: Date = Date()
+    let weeklyData: [DailyFocus]
+    let date: Date = Date()
 
-        private var calendar: Calendar {
-            var cal = Calendar.current
-            cal.firstWeekday = 1
-            return cal
-        }
+    private var calendar: Calendar {
+        var cal = Calendar.current
+        cal.firstWeekday = 1
+        return cal
+    }
 
-        private var weekNumber: Int {
-            let start = calendar.startOfDay(for: goalStartDate)
-            let current = calendar.startOfDay(for: date)
-            let days = calendar.dateComponents([.day], from: start, to: current).day ?? 0
-            return max(1, days / 7)
-        }
+    private var weekNumber: Int {
+        let start = calendar.startOfDay(for: goalStartDate)
+        let current = calendar.startOfDay(for: date)
+        let days = calendar.dateComponents([.day], from: start, to: current).day ?? 0
+        return max(1, days / 7)
+    }
 
-        private var headerTitle: String {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "MMM yyyy"
-            return "Week \(weekNumber), \(formatter.string(from: date))"
-        }
+    private var headerTitle: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM yyyy"
+        return "Week \(weekNumber), \(formatter.string(from: date))"
+    }
     
     var body: some View {
         ZStack{
@@ -141,5 +142,5 @@ struct Recap_2: View {
 
 
 #Preview {
-    Recap_2( currentPage: .constant(1), goalStartDate: Date())
+    Recap_2( currentPage: .constant(1), goalStartDate: Date(), weeklyData: [])
 }

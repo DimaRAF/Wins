@@ -11,26 +11,53 @@ struct Recap_5: View {
     @Binding var currentPage: Int
     @Environment(\.dismiss) var dismiss
     let goalStartDate: Date
-        let date: Date = Date()
+    let weeklyData: [DailyFocus]
+    let date: Date = Date()
 
-        private var calendar: Calendar {
-            var cal = Calendar.current
-            cal.firstWeekday = 1
-            return cal
-        }
+    private var calendar: Calendar {
+        var cal = Calendar.current
+        cal.firstWeekday = 1
+        return cal
+    }
 
-        private var weekNumber: Int {
-            let start = calendar.startOfDay(for: goalStartDate)
-            let current = calendar.startOfDay(for: date)
-            let days = calendar.dateComponents([.day], from: start, to: current).day ?? 0
-            return max(1, days / 7)
-        }
+    private var weekNumber: Int {
+        let start = calendar.startOfDay(for: goalStartDate)
+        let current = calendar.startOfDay(for: date)
+        let days = calendar.dateComponents([.day], from: start, to: current).day ?? 0
+        return max(1, days / 7)
+    }
 
-        private var headerTitle: String {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "MMM yyyy"
-            return "Week \(weekNumber), \(formatter.string(from: date))"
+    private var headerTitle: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM yyyy"
+        return "Week \(weekNumber), \(formatter.string(from: date))"
+    }
+    
+    private var totalMinutes: Int {
+        Int(weeklyData.reduce(0) { $0 + $1.minutes })
+    }
+    
+    private var bestDayName: String {
+        let activeDays = weeklyData.filter { $0.minutes > 0 }
+        if let maxDay = activeDays.max(by: { $0.minutes < $1.minutes }) {
+            return maxDay.day
         }
+        return "N/A"
+    }
+        
+    private var personalityTitle: String {
+        let activeDaysCount = weeklyData.filter { $0.minutes > 0 }.count
+        if activeDaysCount >= 5 {
+            return "Consistent Achiever"
+        } else if activeDaysCount >= 3 {
+            return "Steady Fighter"
+        } else if activeDaysCount >= 1 {
+            return "Focus Starter"
+        } else {
+            return "Resting Day"
+        }
+    }
+    
     var body: some View {
         ZStack{
         Color.appBackground
@@ -49,21 +76,21 @@ struct Recap_5: View {
             Text("Focus Personality")
                 .font(.system(size: 24))
             
-            Text("Consistent Achiever")
+            Text("personalityTitle")
                 .font(.system(size: 32))
                 .foregroundStyle(.primaryBlue)
                 .padding(.bottom, 27)
             
             Text("Total minutes")
                 .font(.system(size: 24))
-            Text("170 min")
+            Text("\(totalMinutes) min")
                 .font(.system(size: 32))
                 .foregroundStyle(.primaryBlue)
                 .padding(.bottom, 27)
             
             Text("BEST day")
                 .font(.system(size: 24))
-            Text("Tusday")
+            Text(bestDayName)
                 .font(.system(size: 32))
                 .foregroundStyle(.primaryBlue)
                 .padding(.bottom, 27)
@@ -108,5 +135,5 @@ struct Recap_5: View {
 }
 
 #Preview {
-    Recap_5(currentPage: .constant(4), goalStartDate: Date())
+    Recap_5(currentPage: .constant(4), goalStartDate: Date(), weeklyData: [])
 }

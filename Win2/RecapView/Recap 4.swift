@@ -11,27 +11,53 @@ struct Recap_4: View {
     @Binding var currentPage: Int
     @Environment(\.dismiss) var dismiss
     let goalStartDate: Date
-        let date: Date = Date()
+    let weeklyData: [DailyFocus]
+    let date: Date = Date()
 
-        private var calendar: Calendar {
-            var cal = Calendar.current
-            cal.firstWeekday = 1
-            return cal
-        }
+    private var calendar: Calendar {
+        var cal = Calendar.current
+        cal.firstWeekday = 1
+        return cal
+    }
 
-        private var weekNumber: Int {
-            let start = calendar.startOfDay(for: goalStartDate)
-            let current = calendar.startOfDay(for: date)
-            let days = calendar.dateComponents([.day], from: start, to: current).day ?? 0
-            return max(1, days / 7)
-        }
+    private var weekNumber: Int {
+        let start = calendar.startOfDay(for: goalStartDate)
+        let current = calendar.startOfDay(for: date)
+        let days = calendar.dateComponents([.day], from: start, to: current).day ?? 0
+        return max(1, days / 7)
+    }
 
-        private var headerTitle: String {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "MMM yyyy"
-            return "Week \(weekNumber), \(formatter.string(from: date))"
-        }
+    private var headerTitle: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM yyyy"
+        return "Week \(weekNumber), \(formatter.string(from: date))"
+    }
     
+    // البحث عن اليوم الذي اشتغل فيه المستخدم رغم أن طاقته كانت "Low"
+    private var lowestEnergyWorkingDay: String {
+        let store = DailyDataStore.shared
+            // تصفية الأيام التي عمل فيها المستخدم فقط
+        let workedDays = weeklyData.filter { $0.minutes > 0 }
+            
+            // 1. البحث عن اليوم المخزّن بطاقة Low
+        if let lowEnergyDay = workedDays.first(where: { day in
+            let energy = store.getDay(date: day.date)?.energy?.lowercased()
+            return energy == "low"
+        }) {
+            return lowEnergyDay.day
+        }
+            
+            // 2. إذا لم يوجد يوم Low، نبحث عن يوم Medium
+        if let mediumEnergyDay = workedDays.first(where: { day in
+            let energy = store.getDay(date: day.date)?.energy?.lowercased()
+            return energy == "medium"
+        }) {
+            return mediumEnergyDay.day
+        }
+            
+        // 3. خيار احتياطي في حال عدم وجود طاقة مسجلة
+        return workedDays.first?.day ?? "N/A"
+    }
     var body: some View {
         ZStack{
             Color.appBackground
@@ -135,5 +161,5 @@ struct Recap_4: View {
     }
 }
 #Preview {
-    Recap_4(currentPage: .constant(3), goalStartDate: Date())
+    Recap_4(currentPage: .constant(3), goalStartDate: Date(), weeklyData: [])
 }
