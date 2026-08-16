@@ -597,6 +597,15 @@ private struct ControlButtonsView: View {
     let onResume: () -> Void
     let onEnd: () -> Void
 
+    private let gradient = LinearGradient(
+        colors: [
+            Color(red: 0.22, green: 0.58, blue: 0.80),
+            Color(red: 0.43, green: 0.72, blue: 0.86)
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
     var body: some View {
         HStack(spacing: 12) {
 
@@ -608,7 +617,8 @@ private struct ControlButtonsView: View {
                         .font(.body)
                         .fontWeight(.semibold)
                         .foregroundStyle(.white)
-                        .frame(width: 90, height: 44)            .background(primaryColor)
+                        .frame(width: 90, height: 44)
+                        .background(gradient)
                         .clipShape(Capsule())
                 }
 
@@ -617,8 +627,8 @@ private struct ControlButtonsView: View {
                     Image(systemName: "pause.fill")
                         .font(.body)
                         .foregroundStyle(.white)
-                        .frame(width: 90, height: 43)
-                        .background(primaryColor)
+                        .frame(width: 89, height: 44)
+                        .background(gradient)
                         .clipShape(Capsule())
                 }
 
@@ -630,22 +640,24 @@ private struct ControlButtonsView: View {
                         .font(.body)
                         .fontWeight(.semibold)
                         .foregroundStyle(.white)
-                        .frame(width: 90, height: 44)                        .background(primaryColor)
+                        .frame(width: 90, height: 44)
+                        .background(gradient)
                         .clipShape(Capsule())
                 }
 
-                // Resume (Play) Button
+                // Resume Button
                 Button(action: onResume) {
                     Image(systemName: "play.fill")
                         .font(.body)
                         .foregroundStyle(.white)
-                        .frame(width: 90, height: 44)
-                        .background(primaryColor)
+                        .frame(width: 90, height: 42)
+                        .background(gradient)
                         .clipShape(Capsule())
                 }
 
             } else {
 
+                // Start Button
                 Button(action: onStart) {
                     Text("Start")
                         .font(.body)
@@ -653,14 +665,13 @@ private struct ControlButtonsView: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 36)
                         .padding(.vertical, 10)
-                        .background(primaryColor)
+                        .background(gradient)
                         .clipShape(Capsule())
                 }
             }
         }
     }
 }
-
 
 // MARK: - Hex Color
 

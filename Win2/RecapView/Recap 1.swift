@@ -52,12 +52,22 @@ struct Recap_1: View {
                     
                 }label: {
                     Text("Next")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .frame(width: 350)
-                    .frame(height: 56)
-                    .background(Color .primaryBlue)
-                    .clipShape(Capsule())
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 56)
+                        .background(
+                            LinearGradient(
+                                colors: [
+                                    Color(red: 0.22, green: 0.58, blue: 0.80),
+                                    Color(red: 0.43, green: 0.72, blue: 0.86)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .shadow(color: Color(red: 0.22, green: 0.58, blue: 0.80).opacity(0.35), radius: 15, x: 0, y: 8)
                    
                 }
                     .padding(.bottom, 75)

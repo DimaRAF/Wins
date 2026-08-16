@@ -74,18 +74,22 @@ struct Question4: View {
                         next()
                     } label: {
                         Text("Next")
-                            .font(.headline)
-                            .foregroundStyle(.white)
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
                             .background(
-                                Color(
-                                    red: 42 / 255,
-                                    green: 146 / 255,
-                                    blue: 201 / 255
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.22, green: 0.58, blue: 0.80),
+                                        Color(red: 0.43, green: 0.72, blue: 0.86)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
                                 )
                             )
-                            .clipShape(Capsule())
+                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .shadow(color: Color(red: 0.22, green: 0.58, blue: 0.80).opacity(0.35), radius: 15, x: 0, y: 8)
                     }
 
                     VStack(spacing: 6) {
