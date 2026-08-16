@@ -8,8 +8,32 @@ struct ProgressCardView: View {
     let targetDate: Date
     let goalStartDate: Date
     let currentDay: Date
+    let selectedDate: Date
 
     @State private var isShowingTimePicker = false
+    
+    private var canEditProgress: Bool {
+        let calendar = Calendar.current
+
+        let today = calendar.startOfDay(for: Date())
+
+        guard let yesterday = calendar.date(
+            byAdding: .day,
+            value: -1,
+            to: today
+        ) else {
+            return false
+        }
+
+        return calendar.isDate(
+            selectedDate,
+            inSameDayAs: today
+        ) ||
+        calendar.isDate(
+            selectedDate,
+            inSameDayAs: yesterday
+        )
+    }
 
     // MARK: - Progress
 
@@ -169,9 +193,13 @@ struct ProgressCardView: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
+                  
+
                     Spacer()
 
-                    editProgressButton
+                    if canEditProgress {
+                        editProgressButton
+                    }
                 }
 
                 HStack(
@@ -506,7 +534,8 @@ private struct CompactTimePicker: View {
                 to: Date()
             )!,
         goalStartDate: Date(),
-        currentDay: Date()
+        currentDay: Date(),
+        selectedDate: Date()
     )
     .padding(20)
     .background(

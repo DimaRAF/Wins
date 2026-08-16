@@ -2,6 +2,7 @@ import SwiftUI
 import Combine
 import WidgetKit
 
+
 struct ContentView: View {
     let goal: String
     let whyGoalMatters: String
@@ -14,6 +15,8 @@ struct ContentView: View {
     @State private var targetMinutes: Int
     @State private var selectedDate =
         Calendar.current.startOfDay(for: Date())
+    
+    @Environment(\.scenePhase) private var scenePhase
 
     private let recommendationAI = RecommendationAI()
     private let dailyDataStore = DailyDataStore.shared
@@ -37,7 +40,7 @@ struct ContentView: View {
     @State private var previousWeeks: [[Int]] = []
 
     private let dayCheckTimer = Timer.publish(
-        every: 60,
+        every: 1,
         on: .main,
         in: .common
     )
@@ -102,6 +105,8 @@ struct ContentView: View {
             targetDate: targetDate
         )
         .onAppear {
+            checkForNewDay()
+
             SharedFocusData.setGoalName(goal)
 
             loadCurrentDayData()
@@ -114,6 +119,11 @@ struct ContentView: View {
             WidgetCenter.shared.reloadTimelines(
                 ofKind: "StrideWidget"
             )
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                checkForNewDay()
+            }
         }
         .onChange(of: completedMinutes) { _, _ in
             updateCurrentDayInWeek()
@@ -591,6 +601,7 @@ struct ContentView: View {
         SharedFocusData.resetDailyFocus()
 
         currentDay = today
+        selectedDate = today
 
         todayEnergy = nil
 

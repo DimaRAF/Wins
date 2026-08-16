@@ -25,7 +25,8 @@ struct GoalPageView: View {
                     goal: goal,
                     targetDate: targetDate,
                     goalStartDate: goalStartDate,
-                    currentDay: currentDay
+                    currentDay: currentDay,
+                    selectedDate: selectedDate
                 )
 
                 EnergyCheckInView(
