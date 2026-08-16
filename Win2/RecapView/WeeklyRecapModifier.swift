@@ -31,11 +31,11 @@ struct WeeklyRecapModifier: ViewModifier {
             }
             .fullScreenCover(isPresented: $showRecap) {
                 TabView(selection: $currentPage) {
-                    Recap_1(currentPage: $currentPage).tag(0)
-                    Recap_2(currentPage: $currentPage).tag(1)
-                    Recap_3(currentPage: $currentPage).tag(2)
-                    Recap_4(currentPage: $currentPage).tag(3)
-                    Recap_5(currentPage: $currentPage).tag(4)
+                    Recap_1(currentPage: $currentPage, goalStartDate: goalStartDate).tag(0)
+                    Recap_2(currentPage: $currentPage, goalStartDate: goalStartDate).tag(1)
+                    Recap_3(currentPage: $currentPage, goalStartDate: goalStartDate).tag(2)
+                    Recap_4(currentPage: $currentPage, goalStartDate: goalStartDate).tag(3)
+                    Recap_5(currentPage: $currentPage, goalStartDate: goalStartDate).tag(4)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .ignoresSafeArea()

@@ -10,12 +10,33 @@ import SwiftUI
 struct Recap_5: View {
     @Binding var currentPage: Int
     @Environment(\.dismiss) var dismiss
+    let goalStartDate: Date
+        let date: Date = Date()
+
+        private var calendar: Calendar {
+            var cal = Calendar.current
+            cal.firstWeekday = 1
+            return cal
+        }
+
+        private var weekNumber: Int {
+            let start = calendar.startOfDay(for: goalStartDate)
+            let current = calendar.startOfDay(for: date)
+            let days = calendar.dateComponents([.day], from: start, to: current).day ?? 0
+            return max(1, days / 7)
+        }
+
+        private var headerTitle: String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM yyyy"
+            return "Week \(weekNumber), \(formatter.string(from: date))"
+        }
     var body: some View {
         ZStack{
         Color.appBackground
             .ignoresSafeArea()
         VStack{
-            Text("week 1, Jul 2026 ")
+            Text(headerTitle)
                 .font(.system(size: 17))
                 .padding(.top,40)
             Divider()
@@ -58,16 +79,28 @@ struct Recap_5: View {
                 
             }label: {
                 Text("Done")
-                .font(.headline)
-                .foregroundStyle(.white)
-                .frame(width: 350)
-                .frame(height: 56)
-                .background(Color.primaryBlue)
-                .clipShape(Capsule())
-               
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .background(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.22, green: 0.58, blue: 0.80),
+                                Color(red: 0.43, green: 0.72, blue: 0.86)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .shadow(
+                        color: Color(red: 0.22, green: 0.58, blue: 0.80).opacity(0.35),
+                        radius: 15, x: 0, y: 8
+                    )
             }
-             
-                .padding(.bottom, 75)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 75)
             
            }
         }
@@ -75,5 +108,5 @@ struct Recap_5: View {
 }
 
 #Preview {
-    Recap_5(currentPage: .constant(4))
+    Recap_5(currentPage: .constant(4), goalStartDate: Date())
 }
