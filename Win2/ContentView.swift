@@ -58,7 +58,7 @@ struct ContentView: View {
                 )
             }
         }
-        .weeklyRecap()
+        .weeklyRecap(goalStartDate: goalStartDate, targetDate: targetDate)
         .onChange(of: completedMinutes) { _, _ in
             updateCurrentDayInWeek()
         }
