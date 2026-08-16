@@ -54,7 +54,11 @@ enum EnergyLevel: String, CaseIterable, Identifiable {
 
 struct EnergyCheckInView: View {
 
-    @State private var selectedEnergy: EnergyLevel?
+    @Binding var selectedEnergy: EnergyLevel?
+    
+    init(selectedEnergy: Binding<EnergyLevel?>) {
+        _selectedEnergy = selectedEnergy
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -215,7 +219,9 @@ struct EnergyCheckInView: View {
 }
 
 #Preview {
-    EnergyCheckInView()
-        .padding(20)
-        .background(Color("AppBackground"))
+    EnergyCheckInView(
+        selectedEnergy: .constant(.medium)
+    )
+    .padding(20)
+    .background(Color("AppBackground"))
 }

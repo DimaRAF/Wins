@@ -11,7 +11,7 @@ struct Win2App: App {
             case 0:
                 SplashView()
             case 1:
-                OnboardingView() // الآن لن يتم تجاهلها!
+                OnboardingView()
             default:
                 ContentView(
                     goal: "Sample Goal",

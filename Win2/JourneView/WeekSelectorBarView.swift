@@ -63,24 +63,53 @@ struct WeekPillView: View {
     }
     
     private var textColor: Color {
-        if week.isLocked { return Color(UIColor.systemGray3) }
-        if isSelected { return .white }
-        if week.isCompleted { return .black }
+        if week.isLocked {
+            return Color(UIColor.systemGray3)
+        }
+
+        if isSelected {
+            return .white
+        }
+
+        if week.isCompleted {
+            return .black
+        }
+
         return appBlue
     }
-    
+
     private var backgroundColor: Color {
-        if isSelected { return appBlue }
+        // Locked weeks should NEVER become blue,
+        // even if they are selected programmatically.
+        if week.isLocked {
+            return Color(UIColor.systemGray6)
+        }
+
+        if isSelected {
+            return appBlue
+        }
+
         return .white
     }
-    
+
     private var borderColor: Color {
-        if week.isLocked { return Color(UIColor.systemGray6) }
+        if week.isLocked {
+            return Color(UIColor.systemGray5)
+        }
+
         return .clear
     }
-    
+
     private var shadowColor: Color {
-        if isSelected { return .clear }
+        if week.isLocked {
+            return .clear
+        }
+
+        if isSelected {
+            return .clear
+        }
+
         return Color.black.opacity(0.06)
     }
+    
 }

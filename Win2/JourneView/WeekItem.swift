@@ -4,9 +4,17 @@ import SwiftUI
 // نموذج بيانات الأيام لـ Chart
 struct DailyFocus: Identifiable {
     let id = UUID()
-    let day: String      // مثل: Sun, Mon...
-    let minutes: Double  // عدد الدقائق
-    let isToday: Bool    // هل هو اليوم المحدد؟
+
+    let date: Date
+    let day: String
+
+    // Actual Work
+    let minutes: Double
+
+    // Target for this day
+    let targetMinutes: Int
+
+    let isToday: Bool
 }
 
 // نموذج بيانات الرؤى الذكية

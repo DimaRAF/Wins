@@ -13,11 +13,14 @@ final class RecommendationAI {
 
     init() {
         do {
-            self.model = try MyTabularClassifier_dataset1_1(
-                configuration: MLModelConfiguration()
-            )
+            self.model =
+                try MyTabularClassifier_dataset1_1(
+                    configuration: MLModelConfiguration()
+                )
         } catch {
-            fatalError("Failed to load AI model: \(error)")
+            fatalError(
+                "Failed to load AI model: \(error)"
+            )
         }
     }
 
@@ -26,47 +29,77 @@ final class RecommendationAI {
         todayEnergy: String,
         yesterdayActualTime: Int,
         yesterdayTarget: Int,
-        maxAvailableTime: Int,
-        minimumTime: Int
+        maxAvailableTime: Int
     ) -> Int {
 
         do {
 
-            let prediction = try model.prediction(
-                Yesterday_Energy: yesterdayEnergy,
-                Today_Energy: todayEnergy,
-                Yesterday_Actual_Time: Int64(yesterdayActualTime),
-                Yesterday_Target: Int64(yesterdayTarget),
-                Max_Available_Time: Int64(maxAvailableTime)
-            )
+            let prediction =
+                try model.prediction(
+                    Yesterday_Energy:
+                        yesterdayEnergy,
+
+                    Today_Energy:
+                        todayEnergy,
+
+                    Yesterday_Actual_Time:
+                        Int64(yesterdayActualTime),
+
+                    Yesterday_Target:
+                        Int64(yesterdayTarget),
+
+                    Max_Available_Time:
+                        Int64(maxAvailableTime)
+                )
 
             let aiRecommendation =
-                Int(prediction.Recommended_Time)
+                Int(
+                    prediction.Recommended_Time
+                )
 
-            // 1. Never go below the minimum
-            let minimumSafe =
-                max(aiRecommendation, minimumTime)
+            // =================================================
+            // IMPORTANT
+            //
+            // Minimum is NOT a constraint for AI.
+            //
+            // The onboarding minimum is used only for Day 1.
+            //
+            // From Day 2 onward:
+            //
+            // AI can recommend below the minimum.
+            // =================================================
 
-            // 2. Never exceed user's maximum availability
             let maximumSafe =
-                min(minimumSafe, maxAvailableTime)
+                min(
+                    aiRecommendation,
+                    maxAvailableTime
+                )
 
-            // 3. Recommendations must be multiples of 5
+            // Keep recommendations in 5-minute increments.
             let rounded =
                 (maximumSafe / 5) * 5
 
-            // 4. Final safety check
-            return max(
-                minimumTime,
-                min(rounded, maxAvailableTime)
+            // Final protection:
+            // AI recommendation must never exceed
+            // the user's maximum available time.
+            return min(
+                rounded,
+                maxAvailableTime
             )
 
         } catch {
 
-            print("AI prediction failed: \(error)")
+            print(
+                "AI prediction failed: \(error)"
+            )
 
-            // Safe fallback
-            return minimumTime
+            // Safe fallback.
+            //
+            // We do NOT use minimum here because
+            // minimum is not an AI constraint.
+            //
+            // If the model fails, return 0.
+            return 0
         }
     }
 }

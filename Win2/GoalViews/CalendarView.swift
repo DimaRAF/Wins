@@ -10,15 +10,14 @@ struct CalendarDay: Identifiable {
 
 struct CalendarView: View {
     let goalStartDate: Date
-
+    @Binding var selectedDate: Date
     private var calendar: Calendar {
         var calendar = Calendar.current
         calendar.firstWeekday = 1
         return calendar
     }
 
-    @State private var selectedDate =
-        Calendar.current.startOfDay(for: Date())
+    
 
     var body: some View {
         TimelineView(
@@ -269,7 +268,8 @@ struct CalendarView: View {
 
 #Preview {
     CalendarView(
-        goalStartDate: Date()
+        goalStartDate: Date(),
+        selectedDate: .constant(Date())
     )
     .padding(20)
     .background(Color("AppBackground"))
