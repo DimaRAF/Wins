@@ -1,10 +1,3 @@
-//
-//  OnboardingView.swift
-//  FirstApp
-//
-//  Created by Nada Alsaeed on 26/02/1448 AH.
-//
-
 import SwiftUI
 
 struct OnboardingView: View {
@@ -40,6 +33,22 @@ struct OnboardingView: View {
             )
     }
 
+    // Reset all data when starting a new goal
+    private func startNewGoal() {
+
+        goal = ""
+        whyGoalMatters = ""
+
+        minimumMinutes = 10
+        maximumMinutes = 45
+
+        targetDate = Date()
+        goalStartDate = Date()
+
+        savedGoal = nil
+        currentQuestion = 1
+    }
+
     var body: some View {
 
         Group {
@@ -57,7 +66,10 @@ struct OnboardingView: View {
                     targetDate:
                         savedGoal.targetDate,
                     goalStartDate:
-                        savedGoal.goalStartDate
+                        savedGoal.goalStartDate,
+                    onStartNewGoal: {
+                        startNewGoal()
+                    }
                 )
 
             } else if currentQuestion == 1 {

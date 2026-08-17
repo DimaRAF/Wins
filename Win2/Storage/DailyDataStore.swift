@@ -119,6 +119,16 @@ final class DailyDataStore {
 
         return data[key(for: date)]
     }
+    func deleteAllData() {
+        UserDefaults.standard.removeObject(
+            forKey: key
+        )
+
+        NotificationCenter.default.post(
+            name: .dailyDataDidChange,
+            object: nil
+        )
+    }
 }
 
 // MARK: - Notifications
@@ -129,4 +139,8 @@ extension Notification.Name {
         Notification.Name(
             "dailyDataDidChange"
         )
+    
+    // MARK: - Delete All Daily Data
+
+ 
 }
