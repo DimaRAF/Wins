@@ -237,6 +237,9 @@ struct ContentView: View {
                     targetMinutes: targetMinutes,
                     energy: todayEnergy?.rawValue
                 )
+                SharedFocusData.setCompletedFocusSeconds(
+                    TimeInterval(newValue * 60)
+                )
             }
             .onChange(of: todayEnergy) { _, _ in
                 // Today's Energy is an AI input.
