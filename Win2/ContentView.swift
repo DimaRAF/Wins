@@ -12,6 +12,7 @@ struct ContentView: View {
     let goalStartDate: Date
     let onStartNewGoal: () -> Void
 
+    @State private var showConfetti = false
     @State private var showExtendGoalSheet = false
     @State private var newTargetDate = Date()
     @State private var hasPresentedGoalEndedAlert = false
@@ -75,170 +76,180 @@ struct ContentView: View {
     }
 
     var body: some View {
-        TabView {
-            Tab("Goal", systemImage: "target") {
-                GoalPageView(
-                    completedMinutes: displayedCompletedBinding,
-                    todayEnergy: displayedEnergyBinding,
-                    targetMinutes: displayedTargetMinutes,
-                    goal: goal,
-                    targetDate: targetDate,
-                    goalStartDate: goalStartDate,
-                    currentDay: currentDay,
-                    selectedDate: $selectedDate
-                )
-            }
-
-            Tab(
-                "Journey",
-                systemImage: "point.topleft.down.curvedto.point.bottomright.up"
-            ) {
-                MainView(
-                    currentWeekMinutes: currentWeekMinutes,
-                    previousWeeks: previousWeeks,
-                    targetDate: targetDate,
-                    goalStartDate: goalStartDate
-                )
-            }
-
-            Tab("Focus", systemImage: "timer") {
-                FocusView(
-                    completedMinutes: $completedMinutes,
-                    targetMinutes: targetMinutes
-                )
-            }
-        }
         
-        .alert(
-            "Your goal period is complete",
-            isPresented: $showGoalEndedAlert
-        ) {
-            Button("Extend This Goal") {
-                newTargetDate = Calendar.current.date(
-                    byAdding: .day,
-                    value: 1,
-                    to: Date()
-                ) ?? Date()
-
-                showExtendGoalSheet = true
-            }
-
-            Button("Start a New Goal") {
-
-                GoalStore.shared.deleteGoal()
-
-                DailyDataStore.shared.deleteAllData()
-
-                SharedFocusData.resetDailyFocus()
-
-                onStartNewGoal()
-            }
-        } message: {
-            Text(
-                "Would you like to keep going or start fresh?"
-            )
-        }
-        
-        .sheet(
-            isPresented: $showExtendGoalSheet
-        ) {
-            ExtendGoalView(
-                selectedDate: $newTargetDate,
-                onSave: {
-                    targetDate = newTargetDate
-
-                    GoalStore.shared.saveGoal(
+        ZStack {
+            
+            TabView {
+                Tab("Goal", systemImage: "target") {
+                    GoalPageView(
+                        completedMinutes: displayedCompletedBinding,
+                        todayEnergy: displayedEnergyBinding,
+                        targetMinutes: displayedTargetMinutes,
                         goal: goal,
-                        whyGoalMatters: whyGoalMatters,
-                        minimumMinutes: minimumMinutes,
-                        maximumMinutes: maximumMinutes,
-                        targetDate: newTargetDate,
+                        targetDate: targetDate,
+                        goalStartDate: goalStartDate,
+                        currentDay: currentDay,
+                        selectedDate: $selectedDate
+                    )
+                }
+                
+                Tab(
+                    "Journey",
+                    systemImage: "point.topleft.down.curvedto.point.bottomright.up"
+                ) {
+                    MainView(
+                        currentWeekMinutes: currentWeekMinutes,
+                        previousWeeks: previousWeeks,
+                        targetDate: targetDate,
                         goalStartDate: goalStartDate
                     )
-
-                    hasPresentedGoalEndedAlert = false
-                    showExtendGoalSheet = false
-
-                    currentDay =
+                }
+                
+                Tab("Focus", systemImage: "timer") {
+                    FocusView(
+                        completedMinutes: $completedMinutes,
+                        targetMinutes: targetMinutes
+                    )
+                }
+            }
+            if showConfetti {
+                ConfettiView()
+                    .allowsHitTesting(false)
+                    .ignoresSafeArea()
+                    .zIndex(10)
+            }}
+            .alert(
+                "Your goal period is complete",
+                isPresented: $showGoalEndedAlert
+            ) {
+                Button("Extend This Goal") {
+                    newTargetDate = Calendar.current.date(
+                        byAdding: .day,
+                        value: 1,
+                        to: Date()
+                    ) ?? Date()
+                    
+                    showExtendGoalSheet = true
+                }
+                
+                Button("Start a New Goal") {
+                    
+                    GoalStore.shared.deleteGoal()
+                    
+                    DailyDataStore.shared.deleteAllData()
+                    
+                    SharedFocusData.resetDailyFocus()
+                    
+                    onStartNewGoal()
+                }
+            } message: {
+                Text(
+                    "Would you like to keep going or start fresh?"
+                )
+            }
+            
+            .sheet(
+                isPresented: $showExtendGoalSheet
+            ) {
+                ExtendGoalView(
+                    selectedDate: $newTargetDate,
+                    onSave: {
+                        targetDate = newTargetDate
+                        
+                        GoalStore.shared.saveGoal(
+                            goal: goal,
+                            whyGoalMatters: whyGoalMatters,
+                            minimumMinutes: minimumMinutes,
+                            maximumMinutes: maximumMinutes,
+                            targetDate: newTargetDate,
+                            goalStartDate: goalStartDate
+                        )
+                        
+                        hasPresentedGoalEndedAlert = false
+                        showExtendGoalSheet = false
+                        
+                        currentDay =
                         Calendar.current.startOfDay(
                             for: Date()
                         )
-
-                    selectedDate = currentDay
-
-                    loadCurrentDayData()
-                    loadLatestYesterdayData()
-                    updateAIRecommendationIfPossible()
-                }
-            )
-        }
-        
-        .weeklyRecap(
-            goalStartDate: goalStartDate,
-            targetDate: targetDate
-        )
-        .onAppear {
-            checkForNewDay()
-            if hasGoalEnded && !hasPresentedGoalEndedAlert {
-                hasPresentedGoalEndedAlert = true
-                showGoalEndedAlert = true
+                        
+                        selectedDate = currentDay
+                        
+                        loadCurrentDayData()
+                        loadLatestYesterdayData()
+                        updateAIRecommendationIfPossible()
+                    }
+                )
             }
-
-            SharedFocusData.setGoalName(goal)
-
-            loadCurrentDayData()
-            loadLatestYesterdayData()
-            loadDataForSelectedDate()
-
-            // AI starts only from Day 2.
-            updateAIRecommendationIfPossible()
-
-            WidgetCenter.shared.reloadTimelines(
-                ofKind: "StrideWidget"
+            
+            .weeklyRecap(
+                goalStartDate: goalStartDate,
+                targetDate: targetDate
             )
-        }
-        .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .active {
+            .onAppear {
                 checkForNewDay()
-
                 if hasGoalEnded && !hasPresentedGoalEndedAlert {
                     hasPresentedGoalEndedAlert = true
                     showGoalEndedAlert = true
+                    celebrateGoalCompletion()
+                }
+                
+                SharedFocusData.setGoalName(goal)
+                
+                loadCurrentDayData()
+                loadLatestYesterdayData()
+                loadDataForSelectedDate()
+                
+                // AI starts only from Day 2.
+                updateAIRecommendationIfPossible()
+                
+                WidgetCenter.shared.reloadTimelines(
+                    ofKind: "StrideWidget"
+                )
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    checkForNewDay()
+                    
+                    if hasGoalEnded && !hasPresentedGoalEndedAlert {
+                        hasPresentedGoalEndedAlert = true
+                        showGoalEndedAlert = true
+                        celebrateGoalCompletion()
+                    }
                 }
             }
-        }
-        .onChange(of: completedMinutes) { _, newValue in
-
-            updateCurrentDayInWeek()
-
-            // If the user is viewing today,
-            // keep the Goal page synced with Focus.
-            if isToday(selectedDate) {
-                displayedCompletedMinutes = newValue
+            .onChange(of: completedMinutes) { _, newValue in
+                
+                updateCurrentDayInWeek()
+                
+                // If the user is viewing today,
+                // keep the Goal page synced with Focus.
+                if isToday(selectedDate) {
+                    displayedCompletedMinutes = newValue
+                }
+                
+                // Save today's latest completed time.
+                dailyDataStore.saveDay(
+                    date: Calendar.current.startOfDay(
+                        for: Date()
+                    ),
+                    actualMinutes: newValue,
+                    targetMinutes: targetMinutes,
+                    energy: todayEnergy?.rawValue
+                )
             }
-
-            // Save today's latest completed time.
-            dailyDataStore.saveDay(
-                date: Calendar.current.startOfDay(
-                    for: Date()
-                ),
-                actualMinutes: newValue,
-                targetMinutes: targetMinutes,
-                energy: todayEnergy?.rawValue
-            )
+            .onChange(of: todayEnergy) { _, _ in
+                // Today's Energy is an AI input.
+                updateAIRecommendationIfPossible()
+            }
+            .onChange(of: selectedDate) { _, _ in
+                loadDataForSelectedDate()
+            }
+            .onReceive(dayCheckTimer) { _ in
+                checkForNewDay()
+            }
         }
-        .onChange(of: todayEnergy) { _, _ in
-            // Today's Energy is an AI input.
-            updateAIRecommendationIfPossible()
-        }
-        .onChange(of: selectedDate) { _, _ in
-            loadDataForSelectedDate()
-        }
-        .onReceive(dayCheckTimer) { _ in
-            checkForNewDay()
-        }
-    }
-
+    
     // MARK: - Calendar Helpers
 
     private var calendar: Calendar {
@@ -368,6 +379,16 @@ struct ContentView: View {
             )
 
         return today > endDate
+    }
+    
+    private func celebrateGoalCompletion() {
+        showConfetti = true
+
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + 2.5
+        ) {
+            showConfetti = false
+        }
     }
     private func loadDataForSelectedDate() {
         // Today
@@ -692,6 +713,7 @@ struct ContentView: View {
             if !hasPresentedGoalEndedAlert {
                 hasPresentedGoalEndedAlert = true
                 showGoalEndedAlert = true
+                celebrateGoalCompletion()
             }
 
             return
