@@ -18,6 +18,8 @@ struct MainView: View {
 
     @State private var selectedWeekTitle = "Week 1"
 
+    @State private var selectedChartDay: String? = nil
+
     // MARK: - Data Store
 
     private let dailyDataStore = DailyDataStore.shared
@@ -68,7 +70,9 @@ struct MainView: View {
 
         previousWeeks.count + 1
     }
-    
+
+    // MARK: - Total Weeks
+
     private var totalWeeks: Int {
 
         let calendar = Calendar.current
@@ -84,14 +88,14 @@ struct MainView: View {
             )
 
         let difference =
-                calendar.dateComponents(
-                    [.day],
-                    from: start,
-                    to: end
-                ).day ?? 0
+            calendar.dateComponents(
+                [.day],
+                from: start,
+                to: end
+            ).day ?? 0
 
-            // Count both the start date and
-            // the final date.
+        // Count both the start date and
+        // the final date.
         let totalDays =
             difference + 1
 
@@ -107,10 +111,9 @@ struct MainView: View {
             )
         )
     }
-    
+
     // MARK: - Total Months
 
-    
     private var totalMonths: Int {
 
         return max(
@@ -144,11 +147,11 @@ struct MainView: View {
             )
 
         guard let weekStart =
-            calendar.date(
-                byAdding: .day,
-                value: (weekNumber - 1) * 7,
-                to: firstWeekStart
-            )
+                calendar.date(
+                    byAdding: .day,
+                    value: (weekNumber - 1) * 7,
+                    to: firstWeekStart
+                )
         else {
             return []
         }
@@ -670,7 +673,10 @@ struct MainView: View {
                                 selectedWeek.title,
 
                             dailyData:
-                                selectedWeek.dailyData
+                                selectedWeek.dailyData,
+
+                            selectedDay:
+                                $selectedChartDay
                         )
                         .id(
                             dataRefreshID
@@ -715,6 +721,12 @@ struct MainView: View {
                     .id(
                         selectedWeek.id
                     )
+                    .contentShape(
+                        Rectangle()
+                    )
+                    .onTapGesture {
+                        selectedChartDay = nil
+                    }
                 }
 
                 Spacer()
@@ -754,6 +766,8 @@ struct MainView: View {
             of: selectedMonth
         ) { _, newMonth in
 
+            selectedChartDay = nil
+
             let firstWeek =
                 ((newMonth - 1) * 4) + 1
 
@@ -782,7 +796,6 @@ struct MainView: View {
                     "Week \(firstWeek)"
             }
         }
-        
 
         // --------------------------------------------------------
         // Daily Data Changed
@@ -797,6 +810,8 @@ struct MainView: View {
 
             // Refresh the Journey data
             // after Actual Work changes.
+
+            selectedChartDay = nil
 
             dataRefreshID =
                 UUID()

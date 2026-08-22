@@ -6,7 +6,9 @@ struct FocusChartCardView: View {
     let weekTitle: String
     let dailyData: [DailyFocus]
 
-    @State private var selectedDay: String? = nil
+    // MARK: - Selection
+
+    @Binding var selectedDay: String?
 
     // MARK: - Dynamic Axis
 
@@ -15,63 +17,40 @@ struct FocusChartCardView: View {
         let highestValue =
             dailyData
                 .map {
-                    Int($0.minutes)
+                    max(
+                        Int($0.minutes),
+                        $0.targetMinutes
+                    )
                 }
                 .max() ?? 0
 
-        if highestValue <= 0 {
-            return 10
-        }
-
-        let magnitude =
-            pow(
-                10.0,
-                floor(
-                    log10(
-                        Double(highestValue)
-                    )
+        return max(
+            10,
+            Int(
+                ceil(
+                    Double(highestValue) / 10.0
                 )
-            )
-
-        let normalized =
-            Double(highestValue) /
-            magnitude
-
-        let niceNumber: Double
-
-        if normalized <= 1 {
-            niceNumber = 1
-        } else if normalized <= 2 {
-            niceNumber = 2
-        } else if normalized <= 5 {
-            niceNumber = 5
-        } else {
-            niceNumber = 10
-        }
-
-        return Int(
-            niceNumber * magnitude
+            ) * 10
         )
     }
 
-    // MARK: - Five Axis Values
-
+    // Exactly 5 intervals
     private var yAxisValues: [Int] {
 
-        guard maximumMinutes > 0 else {
-            return [0, 1, 2, 3, 4]
-        }
-
-        let step =
-            Double(maximumMinutes) / 4.0
-
-        return (0...4).map { index in
+        let step = max(
+            10,
             Int(
-                round(
-                    Double(index) * step
+                ceil(
+                    Double(maximumMinutes) / 5.0
                 )
             )
-        }
+        )
+
+        return stride(
+            from: 0,
+            through: maximumMinutes,
+            by: step
+        ).map { $0 }
     }
 
     // MARK: - Selected Data
@@ -142,121 +121,183 @@ struct FocusChartCardView: View {
 
                 Text("Today highlighted")
                     .font(
-                        .system(size: 12)
+                        .system(
+                            size: 12
+                        )
                     )
                     .foregroundColor(.gray)
             }
 
-            // MARK: Chart
+            // MARK: Chart Container
 
-            Chart {
+            ZStack(
+                alignment: .topTrailing
+            ) {
 
-                ForEach(dailyData) { data in
+                Chart {
 
-                    BarMark(
-                        x: .value(
-                            "Day",
-                            data.day
-                        ),
-                        y: .value(
-                            "Minutes",
-                            data.minutes
-                        )
-                    )
-                    .foregroundStyle(
-                        data.isToday
-                        ? Color(
-                            red: 0.17,
-                            green: 0.56,
-                            blue: 0.78
-                        )
-                        : Color(
-                            red: 0.54,
-                            green: 0.76,
-                            blue: 0.93
-                        )
-                    )
-                    .cornerRadius(5)
-                }
-            }
+                    ForEach(dailyData) { data in
 
-            // MARK: Y Axis
-
-            .chartYScale(
-                domain:
-                    0...Double(maximumMinutes)
-            )
-
-            .chartYAxis {
-
-                AxisMarks(
-                    position: .leading,
-                    values: yAxisValues
-                ) {
-
-                    AxisGridLine(
-                        stroke: StrokeStyle(
-                            lineWidth: 0.8
-                        )
-                    )
-                    .foregroundStyle(
-                        Color(
-                            UIColor.systemGray5
-                        )
-                    )
-
-                    AxisValueLabel()
-                        .font(
-                            .system(
-                                size: 10
+                        BarMark(
+                            x: .value(
+                                "Day",
+                                data.day
+                            ),
+                            y: .value(
+                                "Minutes",
+                                data.minutes
                             )
                         )
                         .foregroundStyle(
-                            Color.gray
+                            data.isToday
+                            ? Color(
+                                red: 0.17,
+                                green: 0.56,
+                                blue: 0.78
+                            )
+                            : Color(
+                                red: 0.54,
+                                green: 0.76,
+                                blue: 0.93
+                            )
                         )
+                        .opacity(
+                            selectedDay == nil
+                            ? 1.0
+                            :
+                            selectedDay == data.day
+                            ? 1.0
+                            : 0.45
+                        )
+                        .cornerRadius(5)
+                    }
                 }
-            }
 
-            // MARK: X Axis
+                // MARK: Chart Configuration
 
-            .chartXAxis {
+                .chartYScale(
+                    domain:
+                        0...Double(
+                            maximumMinutes
+                        )
+                )
 
-                AxisMarks(
-                    position: .bottom
-                ) {
+                .chartYAxis {
 
-                    AxisValueLabel()
-                        .font(
-                            .system(
-                                size: 10,
-                                weight: .medium
+                    AxisMarks(
+                        position: .leading,
+                        values: yAxisValues
+                    ) {
+
+                        AxisGridLine(
+                            stroke: StrokeStyle(
+                                lineWidth: 0.8
                             )
                         )
                         .foregroundStyle(
-                            Color.gray
+                            Color(
+                                UIColor.systemGray5
+                            )
                         )
+
+                        AxisValueLabel()
+                            .font(
+                                .system(
+                                    size: 10
+                                )
+                            )
+                            .foregroundStyle(
+                                Color.gray
+                            )
+                    }
                 }
-            }
 
-            // MARK: Day Selection
+                .chartXAxis {
 
-            .chartXSelection(
-                value: $selectedDay
-            )
+                    AxisMarks(
+                        position: .bottom
+                    ) {
 
-            .frame(height: 180)
+                        AxisValueLabel()
+                            .font(
+                                .system(
+                                    size: 10,
+                                    weight: .medium
+                                )
+                            )
+                            .foregroundStyle(
+                                Color.gray
+                            )
+                    }
+                }
 
-            // MARK: Selected Day Info
+                // MARK: Single Tap On Chart
 
-            if let selectedData {
+                .chartOverlay { proxy in
 
-                HStack {
+                    GeometryReader { geometry in
 
-                    Spacer()
+                        Rectangle()
+                            .fill(
+                                Color.clear
+                            )
+                            .contentShape(
+                                Rectangle()
+                            )
+                            .highPriorityGesture(
+                                SpatialTapGesture()
+                                    .onEnded { value in
+
+                                        let location =
+                                            value.location
+
+                                        let plotFrame =
+                                            geometry[
+                                                proxy.plotAreaFrame
+                                            ]
+
+                                        let x =
+                                            location.x
+                                            -
+                                            plotFrame.origin.x
+
+                                        guard x >= 0,
+                                              x <= plotFrame.width
+                                        else {
+                                            return
+                                        }
+
+                                        if let day: String =
+                                            proxy.value(
+                                                atX: x,
+                                                as: String.self
+                                            ) {
+
+                                            if dailyData.contains(
+                                                where: {
+                                                    $0.day == day
+                                                }
+                                            ) {
+
+                                                selectedDay = day
+                                            }
+                                        }
+                                    }
+                            )
+                    }
+                }
+
+                .frame(
+                    height: 180
+                )
+
+                // MARK: Popup
+
+                if let selectedData {
 
                     VStack(
                         alignment: .leading,
-                        spacing: 10
+                        spacing: 8
                     ) {
 
                         Text(
@@ -264,41 +305,37 @@ struct FocusChartCardView: View {
                         )
                         .font(
                             .system(
-                                size: 16,
+                                size: 15,
                                 weight: .semibold
                             )
                         )
-                        .foregroundColor(
-                            .gray
-                        )
+                        .foregroundColor(.gray)
 
                         Text(
                             "Focus: \(Int(selectedData.minutes)) min"
                         )
                         .font(
                             .system(
-                                size: 16,
+                                size: 15,
                                 weight: .semibold
                             )
                         )
-                        .foregroundColor(
-                            .black
-                        )
+                        .foregroundColor(.black)
                     }
                     .padding(
                         .horizontal,
-                        22
+                        18
                     )
                     .padding(
                         .vertical,
-                        18
+                        14
                     )
                     .background(
                         Color.white
                     )
                     .clipShape(
                         RoundedRectangle(
-                            cornerRadius: 24
+                            cornerRadius: 20
                         )
                     )
                     .shadow(
@@ -306,21 +343,31 @@ struct FocusChartCardView: View {
                             Color.black.opacity(
                                 0.12
                             ),
-                        radius: 12,
+                        radius: 10,
                         x: 0,
-                        y: 5
+                        y: 4
                     )
-                }
-                .padding(.top, -150)
-                .padding(.bottom, 20)
-                .transition(
-                    .opacity.combined(
-                        with:
-                            .scale(
-                                scale: 0.95
+
+                    // Keep popup inside card
+
+                    .padding(
+                        .top,
+                        8
+                    )
+                    .padding(
+                        .trailing,
+                        8
+                    )
+
+                    .transition(
+                        .opacity
+                            .combined(
+                                with: .scale(
+                                    scale: 0.95
+                                )
                             )
                     )
-                )
+                }
             }
         }
 
@@ -330,21 +377,22 @@ struct FocusChartCardView: View {
             Color.white
         )
 
-        .cornerRadius(20)
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 20
+            )
+        )
 
         .shadow(
             color:
-                Color.black.opacity(0.04),
+                Color.black.opacity(
+                    0.04
+                ),
             radius: 8,
             x: 0,
             y: 4
         )
 
         .padding(.horizontal)
-
-        .animation(
-            .easeInOut(duration: 0.2),
-            value: selectedDay
-        )
     }
 }
