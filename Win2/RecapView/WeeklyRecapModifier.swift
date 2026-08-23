@@ -14,7 +14,7 @@ struct WeeklyRecapModifier: ViewModifier {
     private func getPreviousWeekData() -> [DailyFocus] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        let days = ["Sunday", "Monday", "Tueday", "Wedday", "Thuday", "Friday", "Satday"]
         
         // بداية الأسبوع الماضي (قبل 7 أيام)
         guard let lastWeekStart = calendar.date(byAdding: .day, value: -7, to: today) else { return [] }

@@ -76,7 +76,7 @@ struct Recap_5: View {
             Text("Focus Personality")
                 .font(.system(size: 24))
             
-            Text("personalityTitle")
+            Text(personalityTitle)
                 .font(.system(size: 32))
                 .foregroundStyle(.primaryBlue)
                 .padding(.bottom, 27)
