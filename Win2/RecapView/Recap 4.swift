@@ -115,7 +115,7 @@ struct Recap_4: View {
                 Text("Unstoppable")
                         .font(.system(size: 24))
                     
-                Text("Monday")
+                Text(lowestEnergyWorkingDay)
                         .font(.system(size: 64))
                         .foregroundStyle(.primaryBlue)
                     
