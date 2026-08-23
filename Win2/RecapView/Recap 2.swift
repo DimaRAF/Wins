@@ -33,6 +33,10 @@ struct Recap_2: View {
         return "Week \(weekNumber), \(formatter.string(from: date))"
     }
     
+    private var totalMinutes: Int {
+        Int(weeklyData.reduce(0) { $0 + $1.minutes })
+    }
+    
     var body: some View {
         ZStack{
             Color.appBackground
@@ -90,14 +94,14 @@ struct Recap_2: View {
                 Text("You stepped up!")
                         .font(.system(size: 24))
                     
-                Text("170")
+                Text("\(totalMinutes)")
                         .font(.system(size: 64))
                         .foregroundStyle(.primaryBlue)
                     
                 Text("Total minutes")
                         .font(.system(size: 24))
                     
-                Text("That’s 170 minutes invested in becoming the best version of yourself..👏🏻 ")
+                Text("That’s \(totalMinutes) minutes invested in becoming the best version of yourself..👏🏻 ")
                     .multilineTextAlignment(.center)
                     .font(.system(size: 17))
                     .frame(maxWidth: .infinity)
