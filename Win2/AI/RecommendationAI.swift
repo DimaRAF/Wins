@@ -57,17 +57,7 @@ final class RecommendationAI {
                     prediction.Recommended_Time
                 )
 
-            // =================================================
-            // IMPORTANT
-            //
-            // Minimum is NOT a constraint for AI.
-            //
-            // The onboarding minimum is used only for Day 1.
-            //
-            // From Day 2 onward:
-            //
-            // AI can recommend below the minimum.
-            // =================================================
+            
 
             let maximumSafe =
                 min(
@@ -94,9 +84,6 @@ final class RecommendationAI {
             )
 
             // Safe fallback.
-            //
-            // We do NOT use minimum here because
-            // minimum is not an AI constraint.
             //
             // If the model fails, return 0.
             return 0
