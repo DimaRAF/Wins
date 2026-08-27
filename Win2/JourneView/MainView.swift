@@ -13,11 +13,8 @@ struct MainView: View {
     // MARK: - State
 
     @State private var dataRefreshID = UUID()
-
     @State private var selectedMonth = 1
-
     @State private var selectedWeekTitle = "Week 1"
-
     @State private var selectedChartDay: String? = nil
 
     // MARK: - Data Store
@@ -27,96 +24,116 @@ struct MainView: View {
     // MARK: - Calendar
 
     private var appCalendar: Calendar {
-
         var calendar = Calendar.current
-
-        // Sunday = first day of week
         calendar.firstWeekday = 1
-
         return calendar
     }
 
-    // MARK: - Start Of Week
-
-    private func startOfWeek(
-        for date: Date
-    ) -> Date {
+    // MARK: - Current Week Number
+    private var currentWeekNumber: Int {
 
         let calendar = appCalendar
 
-        let startOfDay =
-            calendar.startOfDay(
-                for: date
-            )
+        let startDate = calendar.startOfDay(
+            for: goalStartDate
+        )
 
-        let weekday =
-            calendar.component(
-                .weekday,
-                from: startOfDay
-            )
+        let today = calendar.startOfDay(
+            for: Date()
+        )
 
-        let daysFromSunday = weekday - 1
+        // Before the goal starts
+        if today < startDate {
+            return 1
+        }
 
-        return calendar.date(
-            byAdding: .day,
-            value: -daysFromSunday,
-            to: startOfDay
-        ) ?? startOfDay
-    }
+        let elapsedDays =
+            calendar.dateComponents(
+                [.day],
+                from: startDate,
+                to: today
+            ).day ?? 0
 
-    // MARK: - Current Week Number
+        let calculatedWeek =
+            (elapsedDays / 7) + 1
 
-    private var currentWeekNumber: Int {
-
-        previousWeeks.count + 1
+        // Never go beyond the actual goal duration
+        return min(
+            max(calculatedWeek, 1),
+            totalWeeks
+        )
     }
 
     // MARK: - Total Weeks
 
     private var totalWeeks: Int {
 
-        let calendar = Calendar.current
+        let calendar = appCalendar
 
-        let start =
-            calendar.startOfDay(
-                for: goalStartDate
-            )
+        let start = calendar.startOfDay(
+            for: goalStartDate
+        )
 
-        let end =
-            calendar.startOfDay(
-                for: targetDate
-            )
+        let end = calendar.startOfDay(
+            for: targetDate
+        )
 
-        let difference =
+        guard start <= end else {
+            return 1
+        }
+
+        // Week 1:
+        // Goal Start → Saturday
+
+        let weekday = calendar.component(
+            .weekday,
+            from: start
+        )
+
+        let daysUntilSaturday = 7 - weekday
+
+        guard let firstSaturday = calendar.date(
+            byAdding: .day,
+            value: daysUntilSaturday,
+            to: start
+        ) else {
+            return 1
+        }
+
+        // Goal finishes during Week 1
+        if end <= firstSaturday {
+            return 1
+        }
+
+        // Week 2 starts on Sunday
+        guard let firstSunday = calendar.date(
+            byAdding: .day,
+            value: 1,
+            to: firstSaturday
+        ) else {
+            return 1
+        }
+
+        let remainingDays =
             calendar.dateComponents(
                 [.day],
-                from: start,
+                from: firstSunday,
                 to: end
             ).day ?? 0
 
-        // Count both the start date and
-        // the final date.
-        let totalDays =
-            difference + 1
-
-        // At least one week.
-        return max(
-            1,
-            Int(
-                ceil(
-                    Double(
-                        max(totalDays, 1)
-                    ) / 7.0
-                )
+        let remainingWeeks = Int(
+            ceil(
+                Double(remainingDays + 1) / 7.0
             )
         )
+
+        return 1 + remainingWeeks
     }
 
     // MARK: - Total Months
 
     private var totalMonths: Int {
-
-        return max(
+        max(
             1,
             Int(
                 ceil(
@@ -126,7 +143,177 @@ struct MainView: View {
         )
     }
 
-    // MARK: - Daily Data From Store
+    // MARK: - Week Start Date
+
+    private func weekStartDate(
+        forWeekNumber weekNumber: Int
+    ) -> Date {
+
+        let calendar = appCalendar
+
+        let goalStart = calendar.startOfDay(
+            for: goalStartDate
+        )
+
+        // Week 1 starts exactly on
+        // the goal start date.
+        if weekNumber == 1 {
+            return goalStart
+        }
+
+        let weekday = calendar.component(
+            .weekday,
+            from: goalStart
+        )
+
+        // Sunday = 1
+        // Saturday = 7
+        let daysUntilSaturday = 7 - weekday
+
+        guard let firstSaturday = calendar.date(
+            byAdding: .day,
+            value: daysUntilSaturday,
+            to: goalStart
+        ) else {
+            return goalStart
+        }
+
+        // Week 2 starts on Sunday.
+        guard let firstSunday = calendar.date(
+            byAdding: .day,
+            value: 1,
+            to: firstSaturday
+        ) else {
+            return goalStart
+        }
+
+        // Week 3, 4, 5...
+        // each starts 7 days later.
+        return calendar.date(
+            byAdding: .day,
+            value: (weekNumber - 2) * 7,
+            to: firstSunday
+        ) ?? firstSunday
+    }
+
+    // MARK: - Real Week Date Range
+
+    private func weekDateRange(
+        forWeekNumber weekNumber: Int
+    ) -> String {
+
+        let calendar = appCalendar
+
+        let goalStart = calendar.startOfDay(
+            for: goalStartDate
+        )
+
+        let goalEnd = calendar.startOfDay(
+            for: targetDate
+        )
+
+        let weekStart: Date
+
+        if weekNumber == 1 {
+
+            // Week 1 starts exactly on the
+            // user's goal start date.
+            weekStart = goalStart
+
+        } else {
+
+            // Find the first Saturday after
+            // the goal start date.
+
+            let weekday = calendar.component(
+                .weekday,
+                from: goalStart
+            )
+
+            // Sunday = 1
+            // Monday = 2
+            // ...
+            // Saturday = 7
+
+            let daysUntilSaturday =
+                (7 - weekday + 7) % 7
+
+            guard let firstSaturday =
+                calendar.date(
+                    byAdding: .day,
+                    value: daysUntilSaturday,
+                    to: goalStart
+                )
+            else {
+                return ""
+            }
+
+            // Week 2 starts on Sunday
+            // immediately after that Saturday.
+            guard let firstSunday =
+                calendar.date(
+                    byAdding: .day,
+                    value: 1,
+                    to: firstSaturday
+                )
+            else {
+                return ""
+            }
+
+            // Every week after Week 1
+            // starts on Sunday.
+            guard let calculatedStart =
+                calendar.date(
+                    byAdding: .day,
+                    value: (weekNumber - 2) * 7,
+                    to: firstSunday
+                )
+            else {
+                return ""
+            }
+
+            weekStart = calculatedStart
+        }
+
+        guard weekStart <= goalEnd else {
+            return ""
+        }
+
+        // Normal weeks end on Saturday.
+        guard let normalWeekEnd =
+            calendar.date(
+                byAdding: .day,
+                value:
+                    weekNumber == 1
+                    ? (
+                        7 -
+                        calendar.component(
+                            .weekday,
+                            from: goalStart
+                        )
+                    )
+                    : 6,
+                to: weekStart
+            )
+        else {
+            return ""
+        }
+
+        // The final week cannot go beyond
+        // the user's selected target date.
+        let weekEnd = min(
+            normalWeekEnd,
+            goalEnd
+        )
+
+        let formatter = DateFormatter()
+        formatter.locale = Locale.current
+        formatter.dateFormat = "d MMM"
+
+        return "\(formatter.string(from: weekStart)) – \(formatter.string(from: weekEnd))"
+    }
+
+    // MARK: - Daily Data
 
     private func makeDailyData(
         forWeekNumber weekNumber: Int,
@@ -136,30 +323,28 @@ struct MainView: View {
 
         let calendar = appCalendar
 
-        let goalStart =
-            calendar.startOfDay(
-                for: goalStartDate
-            )
+        let goalStart = calendar.startOfDay(
+            for: goalStartDate
+        )
 
-        let firstWeekStart =
-            startOfWeek(
-                for: goalStart
-            )
+        // IMPORTANT:
+        // This is ONLY for the chart.
+        // The chart still displays Sun-Sat.
+        let firstWeekStart = startOfWeek(
+            for: goalStart
+        )
 
-        guard let weekStart =
-                calendar.date(
-                    byAdding: .day,
-                    value: (weekNumber - 1) * 7,
-                    to: firstWeekStart
-                )
-        else {
+        guard let weekStart = calendar.date(
+            byAdding: .day,
+            value: (weekNumber - 1) * 7,
+            to: firstWeekStart
+        ) else {
             return []
         }
 
-        let today =
-            calendar.startOfDay(
-                for: Date()
-            )
+        let today = calendar.startOfDay(
+            for: Date()
+        )
 
         let days = [
             "Sun",
@@ -173,20 +358,17 @@ struct MainView: View {
 
         return (0..<7).map { index in
 
-            let date =
-                calendar.date(
-                    byAdding: .day,
-                    value: index,
-                    to: weekStart
-                )!
+            let date = calendar.date(
+                byAdding: .day,
+                value: index,
+                to: weekStart
+            )!
 
-            let isToday =
-                calendar.isDate(
-                    date,
-                    inSameDayAs: today
-                )
+            let isToday = calendar.isDate(
+                date,
+                inSameDayAs: today
+            )
 
-            // Future day
             if date > today {
 
                 return DailyFocus(
@@ -198,7 +380,6 @@ struct MainView: View {
                 )
             }
 
-            // Before goal started
             if date < goalStart {
 
                 return DailyFocus(
@@ -210,15 +391,14 @@ struct MainView: View {
                 )
             }
 
-            // Read latest saved data
             let savedDay =
                 dailyDataStore.getDay(
                     date: date
                 )
 
             let actualMinutes =
-                savedDay?.actualMinutes
-                ?? (
+                savedDay?.actualMinutes ??
+                (
                     index < fallbackMinutes.count
                     ? fallbackMinutes[index]
                     : 0
@@ -238,36 +418,93 @@ struct MainView: View {
         }
     }
 
-    // MARK: - Generate Weekly Insights
+    // MARK: - Start Of Week
+    // Used ONLY by the chart.
+
+    private func startOfWeek(
+        for date: Date
+    ) -> Date {
+
+        let calendar = appCalendar
+
+        let startOfDay = calendar.startOfDay(
+            for: date
+        )
+
+        let weekday = calendar.component(
+            .weekday,
+            from: startOfDay
+        )
+
+        let daysFromSunday = weekday - 1
+
+        return calendar.date(
+            byAdding: .day,
+            value: -daysFromSunday,
+            to: startOfDay
+        ) ?? startOfDay
+    }
+
+    // MARK: - Weekly Insights
 
     private func generateInsights(
         for dailyData: [DailyFocus]
     ) -> [InsightItem] {
 
-        // Days where the user actually worked
         let completedDays =
             dailyData.filter {
-                $0.minutes > 0
+                let date = appCalendar.startOfDay(
+                    for: $0.date
+                )
+
+                let start =
+                    appCalendar.startOfDay(
+                        for: goalStartDate
+                    )
+
+                let end =
+                    appCalendar.startOfDay(
+                        for: targetDate
+                    )
+
+                return date >= start &&
+                       date <= end &&
+                       $0.minutes > 0
+            }
+
+        let validDays =
+            dailyData.filter {
+                let date = appCalendar.startOfDay(
+                    for: $0.date
+                )
+
+                let start =
+                    appCalendar.startOfDay(
+                        for: goalStartDate
+                    )
+
+                let end =
+                    appCalendar.startOfDay(
+                        for: targetDate
+                    )
+
+                return date >= start &&
+                       date <= end
             }
 
         let completedCount =
             completedDays.count
 
-        // --------------------------------------------------
-        // 1. Completion
-        // --------------------------------------------------
+        let totalDays =
+            validDays.count
 
         let completionInsight =
             InsightItem(
                 icon: "bolt.fill",
                 text:
-                    "You completed \(completedCount) out of 7 days this week.",
+                    "You completed \(completedCount) out of \(totalDays) days this week.",
                 theme: .orange
             )
-
-        // --------------------------------------------------
-        // 2. Highest productivity
-        // --------------------------------------------------
 
         let highestDay =
             completedDays.max {
@@ -309,16 +546,11 @@ struct MainView: View {
                 )
         }
 
-        // --------------------------------------------------
-        // 3. Focus time insight
-        // --------------------------------------------------
-
         let targets =
             dailyData.compactMap {
                 data -> Int? in
 
-                guard data.targetMinutes > 0
-                else {
+                guard data.targetMinutes > 0 else {
                     return nil
                 }
 
@@ -393,12 +625,11 @@ struct MainView: View {
                 )
         }
 
-        // --------------------------------------------------
-        // 4. Consistency
-        // --------------------------------------------------
-
         let totalFocusMinutes =
-            dailyData.reduce(0) { total, day in
+            dailyData.reduce(0) {
+                total,
+                day in
+
                 total + Int(day.minutes)
             }
 
@@ -417,63 +648,6 @@ struct MainView: View {
             focusTimeInsight
         ]
     }
-    // MARK: - Real Week Date Range
-
-    private func weekDateRange(
-        forWeekNumber weekNumber: Int
-    ) -> String {
-
-        let calendar = appCalendar
-
-        let startDate =
-            calendar.startOfDay(
-                for: goalStartDate
-            )
-
-        guard let weekStart =
-            calendar.date(
-                byAdding: .day,
-                value: (weekNumber - 1) * 7,
-                to: startDate
-            )
-        else {
-            return ""
-        }
-
-        guard let calculatedEnd =
-            calendar.date(
-                byAdding: .day,
-                value: 6,
-                to: weekStart
-            )
-        else {
-            return ""
-        }
-
-        let goalEnd =
-            calendar.startOfDay(
-                for: targetDate
-            )
-
-        // Don't show dates after the goal ends
-        let weekEnd =
-            min(
-                calculatedEnd,
-                goalEnd
-            )
-
-        let formatter =
-            DateFormatter()
-
-        formatter.locale =
-            Locale.current
-
-        formatter.dateFormat =
-            "d MMM"
-
-        return
-            "\(formatter.string(from: weekStart)) – \(formatter.string(from: weekEnd))"
-    }
 
     // MARK: - Weeks For Selected Month
 
@@ -482,15 +656,12 @@ struct MainView: View {
         let firstWeek =
             ((selectedMonth - 1) * 4) + 1
 
-        // The last week of this month
-        // cannot exceed the actual goal duration.
         let lastWeek =
             min(
                 firstWeek + 3,
                 totalWeeks
             )
 
-        // Safety check
         guard firstWeek <= lastWeek else {
             return []
         }
@@ -498,14 +669,11 @@ struct MainView: View {
         return (firstWeek...lastWeek).map {
             weekNumber in
 
-            // ------------------------------------------------
-            // Completed Week
-            // ------------------------------------------------
+            // MARK: Completed Week
 
             if weekNumber < currentWeekNumber {
 
                 let fallbackMinutes: [Int] =
-
                     weekNumber - 1 <
                     previousWeeks.count
 
@@ -534,11 +702,12 @@ struct MainView: View {
 
                     dateRange:
                         "Previous Week",
+
                     weekDateRange:
-                           weekDateRange(
-                               forWeekNumber:
-                                   weekNumber
-                           ),
+                        weekDateRange(
+                            forWeekNumber:
+                                weekNumber
+                        ),
 
                     isCompleted:
                         true,
@@ -556,9 +725,7 @@ struct MainView: View {
                 )
             }
 
-            // ------------------------------------------------
-            // Current / Active Week
-            // ------------------------------------------------
+            // MARK: Current Week
 
             if weekNumber == currentWeekNumber {
 
@@ -578,11 +745,12 @@ struct MainView: View {
 
                     dateRange:
                         "Current Week",
+
                     weekDateRange:
-                            weekDateRange(
-                                forWeekNumber:
-                                    weekNumber
-                            ),
+                        weekDateRange(
+                            forWeekNumber:
+                                weekNumber
+                        ),
 
                     isCompleted:
                         false,
@@ -600,9 +768,7 @@ struct MainView: View {
                 )
             }
 
-            // ------------------------------------------------
-            // Future / Locked Week
-            // ------------------------------------------------
+            // MARK: Future Week
 
             let dailyData =
                 makeDailyData(
@@ -623,11 +789,12 @@ struct MainView: View {
 
                 dateRange:
                     "Upcoming",
+
                 weekDateRange:
-                        weekDateRange(
-                            forWeekNumber:
-                                weekNumber
-                        ),
+                    weekDateRange(
+                        forWeekNumber:
+                            weekNumber
+                    ),
 
                 isCompleted:
                     false,
@@ -638,7 +805,6 @@ struct MainView: View {
                 dailyData:
                     dailyData,
 
-                // Future weeks don't have insights yet.
                 insights: []
             )
         }
@@ -666,10 +832,6 @@ struct MainView: View {
                 spacing: 12
             ) {
 
-                // ------------------------------------------------
-                // Month Selector
-                // ------------------------------------------------
-
                 HeaderView(
                     targetDate:
                         targetDate,
@@ -684,10 +846,6 @@ struct MainView: View {
                         $selectedMonth
                 )
 
-                // ------------------------------------------------
-                // Week Selector
-                // ------------------------------------------------
-
                 WeekSelectorBarView(
                     weeks:
                         weeksForSelectedMonth,
@@ -697,10 +855,6 @@ struct MainView: View {
                 )
                 .padding(.top, 8)
 
-                // ------------------------------------------------
-                // Selected Week Content
-                // ------------------------------------------------
-
                 if let selectedWeek {
 
                     VStack(
@@ -708,14 +862,10 @@ struct MainView: View {
                         spacing: 12
                     ) {
 
-                        // Week Card
-
                         WeekCardView(
                             week:
                                 selectedWeek
                         )
-
-                        // Daily Focus Time
 
                         Text(
                             "DAILY FOCUS TIME"
@@ -726,19 +876,9 @@ struct MainView: View {
                                 weight: .bold
                             )
                         )
-                        .foregroundColor(
-                            .gray
-                        )
-                        .padding(
-                            .horizontal,
-                            20
-                        )
-                        .padding(
-                            .top,
-                            4
-                        )
-
-                        // Chart
+                        .foregroundColor(.gray)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 4)
 
                         FocusChartCardView(
                             weekTitle:
@@ -750,11 +890,7 @@ struct MainView: View {
                             selectedDay:
                                 $selectedChartDay
                         )
-                        .id(
-                            dataRefreshID
-                        )
-
-                        // Weekly Reflection
+                        .id(dataRefreshID)
 
                         Text(
                             "WEEKLY REFLECTION"
@@ -765,17 +901,9 @@ struct MainView: View {
                                 weight: .bold
                             )
                         )
-                        .foregroundColor(
-                            .gray
-                        )
-                        .padding(
-                            .horizontal,
-                            20
-                        )
-                        .padding(
-                            .top,
-                            4
-                        )
+                        .foregroundColor(.gray)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 4)
 
                         WeeklyReflectionCardView(
                             insights:
@@ -790,12 +918,8 @@ struct MainView: View {
                                 )
                         )
                     )
-                    .id(
-                        selectedWeek.id
-                    )
-                    .contentShape(
-                        Rectangle()
-                    )
+                    .id(selectedWeek.id)
+                    .contentShape(Rectangle())
                     .onTapGesture {
                         selectedChartDay = nil
                     }
@@ -805,19 +929,10 @@ struct MainView: View {
             }
         }
 
-        // --------------------------------------------------------
-        // Animation
-        // --------------------------------------------------------
-
         .animation(
             .easeInOut,
-            value:
-                selectedWeekTitle
+            value: selectedWeekTitle
         )
-
-        // --------------------------------------------------------
-        // Initial State
-        // --------------------------------------------------------
 
         .onAppear {
 
@@ -829,10 +944,6 @@ struct MainView: View {
             selectedWeekTitle =
                 "Week \(currentWeekNumber)"
         }
-
-        // --------------------------------------------------------
-        // Month Changed
-        // --------------------------------------------------------
 
         .onChange(
             of: selectedMonth
@@ -849,10 +960,6 @@ struct MainView: View {
                     totalWeeks
                 )
 
-            // If current week belongs
-            // to the selected month,
-            // keep it selected.
-
             if currentWeekNumber >= firstWeek &&
                 currentWeekNumber <= lastWeek {
 
@@ -861,17 +968,10 @@ struct MainView: View {
 
             } else {
 
-                // Otherwise select the first
-                // available week in this month.
-
                 selectedWeekTitle =
                     "Week \(firstWeek)"
             }
         }
-
-        // --------------------------------------------------------
-        // Daily Data Changed
-        // --------------------------------------------------------
 
         .onReceive(
             NotificationCenter.default.publisher(
@@ -880,13 +980,9 @@ struct MainView: View {
             )
         ) { _ in
 
-            // Refresh the Journey data
-            // after Actual Work changes.
-
             selectedChartDay = nil
 
-            dataRefreshID =
-                UUID()
+            dataRefreshID = UUID()
         }
     }
 
@@ -900,10 +996,7 @@ struct MainView: View {
             ((weekNumber - 1) / 4) + 1
 
         return min(
-            max(
-                month,
-                1
-            ),
+            max(month, 1),
             totalMonths
         )
     }

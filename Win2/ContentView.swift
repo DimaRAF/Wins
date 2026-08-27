@@ -727,21 +727,7 @@ struct ContentView: View {
         currentWeekMinutes[previousDayIndex] =
             completedMinutes
 
-        if calendar.component(
-            .weekday,
-            from: today
-        ) == 1 {
-
-            previousWeeks.append(
-                currentWeekMinutes
-            )
-
-            currentWeekMinutes =
-                Array(
-                    repeating: 0,
-                    count: 7
-                )
-        }
+        
 
         // Save the previous day's final data.
         dailyDataStore.saveDay(

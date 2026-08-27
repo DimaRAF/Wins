@@ -102,30 +102,57 @@ struct FocusChartCardView: View {
 
             // MARK: Legend
 
-            HStack(spacing: 6) {
+            // MARK: - Legend
 
-                RoundedRectangle(
-                    cornerRadius: 2
-                )
-                .fill(
-                    Color(
-                        red: 0.17,
-                        green: 0.56,
-                        blue: 0.78
-                    )
-                )
-                .frame(
-                    width: 8,
-                    height: 8
-                )
+            HStack(spacing: 16) {
 
-                Text("Today highlighted")
-                    .font(
-                        .system(
-                            size: 12
+                // Today
+                HStack(spacing: 6) {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(
+                            Color(
+                                red: 0.17,
+                                green: 0.56,
+                                blue: 0.78
+                            )
                         )
-                    )
-                    .foregroundColor(.gray)
+                        .frame(
+                            width: 8,
+                            height: 8
+                        )
+
+                    Text("Today highlighted")
+                        .font(
+                            .system(
+                                size: 12
+                            )
+                        )
+                        .foregroundColor(.gray)
+                }
+
+                // Past days
+                HStack(spacing: 6) {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(
+                            Color(
+                                red: 0.54,
+                                green: 0.76,
+                                blue: 0.93
+                            )
+                        )
+                        .frame(
+                            width: 8,
+                            height: 8
+                        )
+
+                    Text("Past days highlighted")
+                        .font(
+                            .system(
+                                size: 12
+                            )
+                        )
+                        .foregroundColor(.gray)
+                }
             }
 
             // MARK: Chart Container

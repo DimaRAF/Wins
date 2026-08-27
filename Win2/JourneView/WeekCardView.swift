@@ -1,9 +1,11 @@
 import SwiftUI
 
 struct WeekCardView: View {
+
     let week: WeekItem
 
-    // Green colors - Done
+    // MARK: - Done Colors
+
     let bgGreen = Color(
         red: 0.93,
         green: 0.99,
@@ -22,7 +24,8 @@ struct WeekCardView: View {
         blue: 0.20
     )
 
-    // Blue colors - Active
+    // MARK: - Active Colors
+
     let bgBlue = Color(
         red: 0.94,
         green: 0.96,
@@ -47,10 +50,25 @@ struct WeekCardView: View {
         blue: 0.96
     )
 
-    var body: some View {
+    // MARK: - Locked / Upcoming Colors
 
-        let isDone =
-            week.isCompleted
+    let bgGray = Color(
+        UIColor.systemGray6
+    )
+
+    let pillGray = Color(
+        UIColor.systemGray5
+    )
+
+    let textGray = Color(
+        UIColor.systemGray
+    )
+
+    let dotGray = Color(
+        UIColor.systemGray
+    )
+
+    var body: some View {
 
         HStack {
 
@@ -68,7 +86,11 @@ struct WeekCardView: View {
                         weight: .bold
                     )
                 )
-                .foregroundColor(.gray)
+                .foregroundColor(
+                    week.isLocked
+                    ? textGray
+                    : .gray
+                )
 
                 Text(
                     week.dateRange
@@ -79,9 +101,13 @@ struct WeekCardView: View {
                         weight: .bold
                     )
                 )
-                .foregroundColor(.black)
+                .foregroundColor(
+                    week.isLocked
+                    ? textGray
+                    : .black
+                )
 
-                // REAL DATE
+                // Real dynamic date
                 Text(
                     week.weekDateRange
                 )
@@ -91,15 +117,22 @@ struct WeekCardView: View {
                         weight: .medium
                     )
                 )
-                .foregroundColor(.gray)
+                .foregroundColor(
+                    week.isLocked
+                    ? textGray
+                    : .gray
+                )
             }
 
             Spacer()
 
+            // MARK: - Status
+
             HStack(spacing: 6) {
 
-                if isDone {
+                if week.isCompleted {
 
+                    // DONE
                     Image(
                         systemName:
                             "checkmark.circle.fill"
@@ -110,57 +143,126 @@ struct WeekCardView: View {
                         )
                     )
 
+                    Text("Done")
+                        .font(
+                            .system(
+                                size: 14,
+                                weight: .bold
+                            )
+                        )
+
+                } else if week.isLocked {
+
+                    // UPCOMING / SOON
+                    Circle()
+                        .fill(dotGray)
+                        .frame(
+                            width: 8,
+                            height: 8
+                        )
+
+                    Text("Soon")
+                        .font(
+                            .system(
+                                size: 14,
+                                weight: .bold
+                            )
+                        )
+
                 } else {
 
+                    // ACTIVE
                     Circle()
                         .fill(dotBlue)
                         .frame(
                             width: 8,
                             height: 8
                         )
-                }
 
-                Text(
-                    isDone
-                    ? "Done"
-                    : "Active"
-                )
-                .font(
-                    .system(
-                        size: 14,
-                        weight: .bold
-                    )
-                )
+                    Text("Active")
+                        .font(
+                            .system(
+                                size: 14,
+                                weight: .bold
+                            )
+                        )
+                }
             }
-            .foregroundColor(
-                isDone
-                ? textGreen
-                : textBlue
-            )
+
+            .foregroundColor(statusTextColor)
+
             .padding(
                 .horizontal,
                 14
             )
+
             .padding(
                 .vertical,
                 8
             )
+
             .background(
-                isDone
-                ? pillGreen
-                : pillBlue
+                statusBackgroundColor
             )
+
             .clipShape(
                 Capsule()
             )
         }
+
         .padding(18)
+
         .background(
-            isDone
-            ? bgGreen
-            : bgBlue
+            cardBackgroundColor
         )
+
         .cornerRadius(20)
+
         .padding(.horizontal)
+    }
+
+    // MARK: - Status Text Color
+
+    private var statusTextColor: Color {
+
+        if week.isCompleted {
+            return textGreen
+        }
+
+        if week.isLocked {
+            return textGray
+        }
+
+        return textBlue
+    }
+
+    // MARK: - Status Background
+
+    private var statusBackgroundColor: Color {
+
+        if week.isCompleted {
+            return pillGreen
+        }
+
+        if week.isLocked {
+            return pillGray
+        }
+
+        return pillBlue
+    }
+
+    // MARK: - Card Background
+
+    private var cardBackgroundColor: Color {
+
+        if week.isCompleted {
+            return bgGreen
+        }
+
+        if week.isLocked {
+            return bgGray
+        }
+
+        return bgBlue
     }
 }
