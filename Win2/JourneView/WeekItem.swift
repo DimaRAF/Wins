@@ -53,6 +53,7 @@ struct WeekItem: Identifiable {
     let id = UUID()
     let title: String
     let dateRange: String
+    let weekDateRange: String
     var isCompleted: Bool
     var isLocked: Bool
     let dailyData: [DailyFocus]

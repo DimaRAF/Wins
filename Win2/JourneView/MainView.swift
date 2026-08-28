@@ -417,6 +417,63 @@ struct MainView: View {
             focusTimeInsight
         ]
     }
+    // MARK: - Real Week Date Range
+
+    private func weekDateRange(
+        forWeekNumber weekNumber: Int
+    ) -> String {
+
+        let calendar = appCalendar
+
+        let startDate =
+            calendar.startOfDay(
+                for: goalStartDate
+            )
+
+        guard let weekStart =
+            calendar.date(
+                byAdding: .day,
+                value: (weekNumber - 1) * 7,
+                to: startDate
+            )
+        else {
+            return ""
+        }
+
+        guard let calculatedEnd =
+            calendar.date(
+                byAdding: .day,
+                value: 6,
+                to: weekStart
+            )
+        else {
+            return ""
+        }
+
+        let goalEnd =
+            calendar.startOfDay(
+                for: targetDate
+            )
+
+        // Don't show dates after the goal ends
+        let weekEnd =
+            min(
+                calculatedEnd,
+                goalEnd
+            )
+
+        let formatter =
+            DateFormatter()
+
+        formatter.locale =
+            Locale.current
+
+        formatter.dateFormat =
+            "d MMM"
+
+        return
+            "\(formatter.string(from: weekStart)) – \(formatter.string(from: weekEnd))"
+    }
 
     // MARK: - Weeks For Selected Month
 
@@ -477,6 +534,11 @@ struct MainView: View {
 
                     dateRange:
                         "Previous Week",
+                    weekDateRange:
+                           weekDateRange(
+                               forWeekNumber:
+                                   weekNumber
+                           ),
 
                     isCompleted:
                         true,
@@ -516,6 +578,11 @@ struct MainView: View {
 
                     dateRange:
                         "Current Week",
+                    weekDateRange:
+                            weekDateRange(
+                                forWeekNumber:
+                                    weekNumber
+                            ),
 
                     isCompleted:
                         false,
@@ -556,6 +623,11 @@ struct MainView: View {
 
                 dateRange:
                     "Upcoming",
+                weekDateRange:
+                        weekDateRange(
+                            forWeekNumber:
+                                weekNumber
+                        ),
 
                 isCompleted:
                     false,

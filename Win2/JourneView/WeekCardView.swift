@@ -3,8 +3,7 @@ import SwiftUI
 struct WeekCardView: View {
     let week: WeekItem
 
-    // MARK: - Completed
-
+    // Green colors - Done
     let bgGreen = Color(
         red: 0.93,
         green: 0.99,
@@ -23,8 +22,7 @@ struct WeekCardView: View {
         blue: 0.20
     )
 
-    // MARK: - Active
-
+    // Blue colors - Active
     let bgBlue = Color(
         red: 0.94,
         green: 0.96,
@@ -49,42 +47,16 @@ struct WeekCardView: View {
         blue: 0.96
     )
 
-    // MARK: - Locked
-
-    let bgLocked = Color(
-        red: 0.93,
-        green: 0.93,
-        blue: 0.94
-    )
-
-    let pillLocked = Color(
-        red: 0.86,
-        green: 0.86,
-        blue: 0.87
-    )
-
-    let textLocked = Color(
-        red: 0.42,
-        green: 0.42,
-        blue: 0.44
-    )
-
-    let dotLocked = Color(
-        red: 0.55,
-        green: 0.55,
-        blue: 0.57
-    )
-
     var body: some View {
 
-        let isDone = week.isCompleted
-        let isLocked = week.isLocked
+        let isDone =
+            week.isCompleted
 
         HStack {
 
             VStack(
                 alignment: .leading,
-                spacing: 4
+                spacing: 3
             ) {
 
                 Text(
@@ -96,18 +68,10 @@ struct WeekCardView: View {
                         weight: .bold
                     )
                 )
-                .foregroundColor(
-                    isLocked
-                    ? textLocked
-                    : isDone
-                        ? textGreen
-                        : .gray
-                )
+                .foregroundColor(.gray)
 
                 Text(
-                    isLocked
-                    ? "Upcoming"
-                    : week.dateRange
+                    week.dateRange
                 )
                 .font(
                     .system(
@@ -115,69 +79,38 @@ struct WeekCardView: View {
                         weight: .bold
                     )
                 )
-                .foregroundColor(
-                    isLocked
-                    ? textLocked
-                    : .black
+                .foregroundColor(.black)
+
+                // REAL DATE
+                Text(
+                    week.weekDateRange
                 )
+                .font(
+                    .system(
+                        size: 11,
+                        weight: .medium
+                    )
+                )
+                .foregroundColor(.gray)
             }
 
             Spacer()
 
             HStack(spacing: 6) {
 
-                // -----------------------------------------
-                // LOCKED
-                // -----------------------------------------
-
-                if isLocked {
-
-                    Circle()
-                        .fill(dotLocked)
-                        .frame(
-                            width: 8,
-                            height: 8
-                        )
-
-                    Text("Soon")
-                        .font(
-                            .system(
-                                size: 14,
-                                weight: .bold
-                            )
-                        )
-
-                }
-
-                // -----------------------------------------
-                // COMPLETED
-                // -----------------------------------------
-
-                else if isDone {
+                if isDone {
 
                     Image(
                         systemName:
                             "checkmark.circle.fill"
                     )
                     .font(
-                        .system(size: 14)
+                        .system(
+                            size: 14
+                        )
                     )
 
-                    Text("Done")
-                        .font(
-                            .system(
-                                size: 14,
-                                weight: .bold
-                            )
-                        )
-
-                }
-
-                // -----------------------------------------
-                // ACTIVE
-                // -----------------------------------------
-
-                else {
+                } else {
 
                     Circle()
                         .fill(dotBlue)
@@ -185,31 +118,37 @@ struct WeekCardView: View {
                             width: 8,
                             height: 8
                         )
-
-                    Text("Active")
-                        .font(
-                            .system(
-                                size: 14,
-                                weight: .bold
-                            )
-                        )
                 }
+
+                Text(
+                    isDone
+                    ? "Done"
+                    : "Active"
+                )
+                .font(
+                    .system(
+                        size: 14,
+                        weight: .bold
+                    )
+                )
             }
             .foregroundColor(
-                isLocked
-                ? textLocked
-                : isDone
-                    ? textGreen
-                    : textBlue
+                isDone
+                ? textGreen
+                : textBlue
             )
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
+            .padding(
+                .horizontal,
+                14
+            )
+            .padding(
+                .vertical,
+                8
+            )
             .background(
-                isLocked
-                ? pillLocked
-                : isDone
-                    ? pillGreen
-                    : pillBlue
+                isDone
+                ? pillGreen
+                : pillBlue
             )
             .clipShape(
                 Capsule()
@@ -217,11 +156,9 @@ struct WeekCardView: View {
         }
         .padding(18)
         .background(
-            isLocked
-            ? bgLocked
-            : isDone
-                ? bgGreen
-                : bgBlue
+            isDone
+            ? bgGreen
+            : bgBlue
         )
         .cornerRadius(20)
         .padding(.horizontal)
