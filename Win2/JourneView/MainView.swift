@@ -30,6 +30,7 @@ struct MainView: View {
     }
 
     // MARK: - Current Week Number
+
     private var currentWeekNumber: Int {
 
         let calendar = appCalendar
@@ -47,15 +48,51 @@ struct MainView: View {
             return 1
         }
 
-        let elapsedDays =
+        // Find the first Saturday
+        // of the first week.
+        let weekday = calendar.component(
+            .weekday,
+            from: startDate
+        )
+
+        // Sunday = 1
+        // Monday = 2
+        // ...
+        // Saturday = 7
+        let daysUntilSaturday = 7 - weekday
+
+        guard let firstSaturday = calendar.date(
+            byAdding: .day,
+            value: daysUntilSaturday,
+            to: startDate
+        ) else {
+            return 1
+        }
+
+        // Week 1:
+        // Goal Start → Saturday
+        if today <= firstSaturday {
+            return 1
+        }
+
+        // Week 2 starts on Sunday
+        guard let firstSunday = calendar.date(
+            byAdding: .day,
+            value: 1,
+            to: firstSaturday
+        ) else {
+            return 1
+        }
+
+        let daysSinceFirstSunday =
             calendar.dateComponents(
                 [.day],
-                from: startDate,
+                from: firstSunday,
                 to: today
             ).day ?? 0
 
         let calculatedWeek =
-            (elapsedDays / 7) + 1
+            2 + (daysSinceFirstSunday / 7)
 
         // Never go beyond the actual goal duration
         return min(
