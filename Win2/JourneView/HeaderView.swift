@@ -11,10 +11,10 @@ struct HeaderView: View {
     var body: some View {
         HStack(alignment: .center) {
             
-            Text("My Journey")
+            Text("Journey")
                 .font(
                     .system(
-                        size: 38,
+                        size: 40,
                         weight: .bold
                     )
                 )
